@@ -1,0 +1,19 @@
+"Gamemode"
+{
+    "name"  "MonRp"
+    "version"   "1.1
+"
+
+    "author_name"   "eMe"
+    "author_email"  "artefom@yandex.ru"
+    "author_url"    "http://monrp.do.am/"
+
+    "icon"  ""
+    "info"  ""
+    "hide"  "0"
+
+	"mappattern"
+	{
+		"1"		"^mrp_"
+	}
+}

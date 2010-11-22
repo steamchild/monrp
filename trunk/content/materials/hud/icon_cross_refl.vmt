@@ -1,0 +1,8 @@
+"UnlitGeneric"
+{
+	"$basetexture"		"hud/icon_cross_refl"
+	"$ignorez"			1
+	"$vertexcolor" 		1
+	"$vertexalpha" 		1
+	"$nolod" 			1
+}
