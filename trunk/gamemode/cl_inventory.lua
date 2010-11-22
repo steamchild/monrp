@@ -48,8 +48,8 @@ function INV:PerformLayout()
 end
 
 function INV:SetIndex( Index )
-	self.Index = Index
-	if (Interfaces[Index] == nil) then
+	if (Interfaces[Index] == nil or Interfaces[Index].Index != Index) then
+		self.Index = Index
 		Interfaces[Index] = self return true
 	end
 	return false
