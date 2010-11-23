@@ -23,6 +23,10 @@ function INV:Create(x,y,w,h,Index)
 		self.mom:PerformLayout()
 		self:PerformLayout2()
 	end
+	self.fr.Remove2 = self.fr.Remove
+	self.fr.Remove = function(self)
+		self.mom:Remove()
+	end
 	self.fr.inv = vgui.Create( "DPanelListFix", self.fr )
 		self.fr.inv:SetPos(5,25)
 		self.fr.inv:SetSize(self.Width-10,self.Height-30)
@@ -35,12 +39,13 @@ function INV:AddIcon(Model)
 	self.fr.inv:AddIcon(LocalPlayer():GetModel())
 end
 
-function INV:OnSelect(ItemNum)
+function INV:OnClick(ItemNum)
 	local Item = self.fr.inv.Items[ItemNum]
+	print(FUCK)
 end
 
 function INV:OnClose()
-
+ 	print("Closed")
 end
 
 function INV:PerformLayout()
@@ -48,6 +53,7 @@ function INV:PerformLayout()
 end
 
 function INV:SetIndex( Index )
+	if (!Index) then return false end
 	if (Interfaces[Index] == nil or Interfaces[Index].Index != Index) then
 		self.Index = Index
 		Interfaces[Index] = self return true
@@ -57,6 +63,14 @@ end
 
 function INV:GetIndex()
 	return self.Index
+end
+
+function INV:Remove()
+	self:OnClose()
+	if (self.Index != nil) then
+		Interfaces[self.Index] = nil
+	end
+	print("Removed")
 end
 
 Interfaces = {}

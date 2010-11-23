@@ -46,7 +46,6 @@ function PANEL:Init()
 	self:SetDrawBackground( true )
 	self:SetBottomUp( false )
 	self:SetNoSizing( false )
-	self:SetOnClick( function(icon) print("FUCK") end )
 	
 	self:SetMouseInputEnabled( true )
 	
@@ -108,19 +107,12 @@ end
 /*---------------------------------------------------------
    Name: GetCanvas
 ---------------------------------------------------------*/
-function PANEL:Clear( bDelete )
+function PANEL:Clear()
 
 	for k, panel in pairs( self.Items ) do
 	
 		if ( panel && panel:IsValid() ) then
-		
-			panel:SetParent( panel )
-			panel:SetVisible( false )
-		
-			if ( bDelete ) then
 				panel:Remove()
-			end
-			
 		end
 		
 	end
@@ -145,7 +137,8 @@ function PANEL:AddItem( item )
 
 	item:SetVisible( true )
 	item:SetParent( self:GetCanvas() )
-	table.insert( self.Items, item )
+	item.num = table.insert( self.Items, item )
+	self.Items[item.num].num = item.num
 	
 	self:InvalidateLayout()
 
@@ -154,17 +147,15 @@ end
 /*---------------------------------------------------------
    Name: RemoveItem
 ---------------------------------------------------------*/
-function PANEL:RemoveItem( item, bDontDelete )
+function PANEL:RemoveItem( item )
 
 	for k, panel in pairs( self.Items ) do
 	
 		if ( panel == item ) then
 		
-			self.Items[ k ] = nil
+			table.remove( self.Items, k)
 			
-			if (!bDontDelete) then
-				panel:Remove()
-			end
+			panel:Remove()
 		
 			self:InvalidateLayout()
 		
@@ -372,40 +363,36 @@ function PANEL:OnMousePressed( mcode )
 end
 
 /*---------------------------------------------------------
-   Name: SortByMember
+   Name: Sort
 ---------------------------------------------------------*/
-function PANEL:SortByMember( key, desc )
+function PANEL:Sort()
 
-	desc = desc or true
-
-	table.sort( self.Items, function( a, b ) 
-
-								if ( desc ) then
-								
-									local ta = a
-									local tb = b
-									
-									a = tb
-									b = ta
-								
-								end
-	
-								if ( a[ key ] == nil ) then return false end
-								if ( b[ key ] == nil ) then return true end
-								
-								return a[ key ] > b[ key ]
-								
-							end )
+	for k, v in pairs(self.Items) do 
+		print("DPanelListFix: k: "..k)
+		if (v == nil) then print("DPanelListFix: found nill element in self.Items{} ")
+	end
 
 end
 
-function PANEL:SetOnClick(func)
+function PANEL:SetDoClick()
 
-	self.OnClick = func
+print("DOCLICK HAS BEEN SET")
+//	self.OnClick = func
+//
+//	for k, v in pairs(self.Items) do
+//		v.DoClick = self.OnClick
+//
+//	end
+end
 
-	for k, v in pairs(self.Items) do
-		v.DoClick = self.OnClick
+function PANEL:GetItemNum(item)
+	if (!item.num) then 
+		for k, v in pairs(self.Items) do
+			if (item == v) then return k end
+		end
+		return false end
 	end
+	return item.num
 end
 
 derma.DefineControl( "DPanelListFix", "A Panel that neatly organises other panels", PANEL, "Panel" )
