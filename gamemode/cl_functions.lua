@@ -75,7 +75,7 @@ hook.Add("HUDPaint", "DrawSigns", DrawSigns);
 function DrawInterFace()
 	local Width = 500
 	local Height = 800
-	local inv = INV:Create(ScrW()/2-Width/2,ScrH()/2-Height/2,Width,Height)
+	inv = INV:Create(ScrW()/2-Width/2,ScrH()/2-Height/2,Width,Height)
 	for k=1,40 do
 		inv:AddIcon(LocalPlayer():GetModel())
 	end
@@ -87,7 +87,7 @@ concommand.Add( "rl_drawinterface", DrawInterFace )
 function OpenInterface(ID)
 	local Width = 100
 	local Height = 160
-	local inv = INV:Create(ScrW()/2-Width/2,ScrH()/2-Height/2,Width,Height,ID)
+	Inv = INV:Create(ScrW()/2-Width/2,ScrH()/2-Height/2,Width,Height,ID)
 end
 
 function OpenCmd( data )
