@@ -39,6 +39,7 @@ function PANEL:Init()
 	self.YOffset = 0
 	self.RowSpacing = 4
 	self.RowHeight = 64
+	self.DoClick = function(self) print(self) print("FUCK") end
 	self:SetSpacing( 0 )
 	self:SetPadding( 0 )
 	self:EnableHorizontal( false )
@@ -128,7 +129,7 @@ function PANEL:AddIcon(Model)
 	local Icon = vgui.Create("SpawnIcon",self)
 		Icon:SetModel(Model)
 		Icon.DoClick2 = Icon.DoClick
-		Icon.DoClick = self.OnClick
+		Icon.DoClick = self.DoClick
 	self:AddItem(Icon)
 end
 function PANEL:AddItem( item )
@@ -372,27 +373,6 @@ function PANEL:Sort()
 		if (v == nil) then print("DPanelListFix: found nill element in self.Items{} ")
 	end
 
-end
-
-function PANEL:SetDoClick()
-
-print("DOCLICK HAS BEEN SET")
-//	self.OnClick = func
-//
-//	for k, v in pairs(self.Items) do
-//		v.DoClick = self.OnClick
-//
-//	end
-end
-
-function PANEL:GetItemNum(item)
-	if (!item.num) then 
-		for k, v in pairs(self.Items) do
-			if (item == v) then return k end
-		end
-		return false end
-	end
-	return item.num
 end
 
 derma.DefineControl( "DPanelListFix", "A Panel that neatly organises other panels", PANEL, "Panel" )
