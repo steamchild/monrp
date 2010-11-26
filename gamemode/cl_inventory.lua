@@ -1,6 +1,6 @@
-INV = {}
+INVENTORY = {}
 
-function INV:Create(x,y,w,h,Index)
+function INVENTORY:Create(x,y,w,h,Index)
 	if !self:SetIndex( Index ) then return end
 	self.Width = 500
 	self.Height = 800
@@ -31,28 +31,30 @@ function INV:Create(x,y,w,h,Index)
 		self.fr.inv:SetPos(5,25)
 		self.fr.inv:SetSize(self.Width-10,self.Height-30)
 		self.fr.inv:EnableHorizontal(true)
+		self.fr.inv.DoClick = function(self)
+			self:GetParent():GetParent():GetParent().mom:OnClick(self)
+		end
 		self.fr.inv:SetName("wut")
 	return self
 end
 
-function INV:AddIcon(Model)
+function INVENTORY:AddIcon(Model)
 	self.fr.inv:AddIcon(LocalPlayer():GetModel())
 end
 
-function INV:OnClick(ItemNum)
-	local Item = self.fr.inv.Items[ItemNum]
-	print(FUCK)
+function INVENTORY:OnClick(Item)
+	print(self:GetItemNum(Item))
 end
 
-function INV:OnClose()
+function INVENTORY:OnClose()
  	print("Closed")
 end
 
-function INV:PerformLayout()
+function INVENTORY:PerformLayout()
 
 end
 
-function INV:SetIndex( Index )
+function INVENTORY:SetIndex( Index )
 	if (!Index) then return false end
 	if (Interfaces[Index] == nil or Interfaces[Index].Index != Index) then
 		self.Index = Index
@@ -61,16 +63,26 @@ function INV:SetIndex( Index )
 	return false
 end
 
-function INV:GetIndex()
+function INVENTORY:GetIndex()
 	return self.Index
 end
 
-function INV:Remove()
+function INVENTORY:Remove()
 	self:OnClose()
 	if (self.Index != nil) then
 		Interfaces[self.Index] = nil
 	end
 	print("Removed")
+end
+
+function INVENTORY:GetItemNum(item)
+	if (!item.num) then 
+		for k, v in pairs(self.fr.Items) do
+			if (item == v) then return k end
+		end
+		return false
+	end
+	return item.num
 end
 
 Interfaces = {}
