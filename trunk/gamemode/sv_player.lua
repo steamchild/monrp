@@ -231,9 +231,12 @@ end
 //	INTERFACE
 //--------------------------------------------------
 
+function ply:SendItems(ENTID,Items)
+	datastream.StreamToClients( self,  "ReceiveItems", {ENTID,Items} )
+end
+
 function ply:OpenInterface(ID)
 	umsg.Start( "OpenInterface" );
 		umsg.Long( ID );
-		umsg.String( "OpenInterFace" );
 	umsg.End();
 end

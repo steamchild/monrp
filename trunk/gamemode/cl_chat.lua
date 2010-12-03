@@ -19,7 +19,7 @@ else
 	postfix = "" 
 end
 
-if (type == CHAT_ADVERT) then prefix = "ADVERT" prefixcol=Color(255,255,255) textcol = Color(255,255,0) end
+if (type == CHAT_ADVERT) then prefix = "[ADVERT] " prefixcol=Color(255,255,255) textcol = Color(255,255,0) end
 if (type == CHAT_OOC) then prefix = "(OOC) " prefixcol = namecol textcol = Color(200,200,200) end
 
 chat.AddText(
