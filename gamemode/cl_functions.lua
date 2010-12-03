@@ -79,7 +79,9 @@ function DrawInterFace()
 	for k=1,40 do
 		inv:AddIcon(LocalPlayer():GetModel())
 	end
-
+	for k=1,20 do
+		inv:RemoveItem(k)
+	end
 end
 
 concommand.Add( "rl_drawinterface", DrawInterFace )

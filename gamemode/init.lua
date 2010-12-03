@@ -23,6 +23,7 @@ include( "addstuff.lua" )
 include( "sh_functions.lua" )
 include( "sv_chat.lua" )
 include( "sv_chat_functions.lua" )
+include( "sv_inventory.lua" )
 
 local meta = FindMetaTable("Entity")
 
@@ -181,3 +182,11 @@ end
 function GM:AmmoPickup()
 	print("Ammo Pick uped")
 end
+
+function GM:AcceptStream ( pl, handler, id )
+	if handler == "RequestItems" then
+		if (!pl.LastRequest) then pl.LastRequest = 0 end
+		if (pl.LastRequest<CurTime()-0.2) then pl.LastRequest = CurTime() return true end
+	end
+end
+ 

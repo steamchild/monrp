@@ -42,7 +42,7 @@ function PANEL:Init()
 	self.DoClick = function(self) print(self) print("FUCK") end
 	self:SetSpacing( 0 )
 	self:SetPadding( 0 )
-	self:EnableHorizontal( false )
+	self:EnableHorizontal( true )
 	self:SetAutoSize( false )
 	self:SetDrawBackground( true )
 	self:SetBottomUp( false )
@@ -125,24 +125,26 @@ end
 /*---------------------------------------------------------
    Name: AddItem
 ---------------------------------------------------------*/
-function PANEL:AddIcon(Model)
-	local Icon = vgui.Create("SpawnIcon",self)
-		Icon:SetModel(Model)
-		Icon.DoClick2 = Icon.DoClick
-		Icon.DoClick = self.DoClick
-	self:AddItem(Icon)
+function PANEL:AddIcon(item)
+	if (!item.Model or !item.num) then return end
+		local Icon = vgui.Create("SpawnIcon",self)
+			Icon:SetModel(item.Model)
+			Icon.DoClick2 = Icon.DoClick
+			Icon.DoClick = self.DoClick
+			Icon:SetSize(64,64)
+	self:AddItem(Icon, item.num)
+	return Icon
 end
-function PANEL:AddItem( item )
+function PANEL:AddItem(item,num)
 
-	if (!item || !item:IsValid()) then return end
+	if (!item || !item:IsValid() || !num) then return end
 
 	item:SetVisible( true )
 	item:SetParent( self:GetCanvas() )
-	item.num = table.insert( self.Items, item )
-	self.Items[item.num].num = item.num
+	if (self.Items[num]) then self.Items[num]:Remove() end
+	self.Items[num] = item
 	
 	self:InvalidateLayout()
-
 end
 
 /*---------------------------------------------------------
@@ -152,7 +154,7 @@ function PANEL:RemoveItem( item )
 
 	for k, panel in pairs( self.Items ) do
 	
-		if ( panel == item ) then
+		if ( panel == item) then
 		
 			table.remove( self.Items, k)
 			
@@ -161,8 +163,15 @@ function PANEL:RemoveItem( item )
 			self:InvalidateLayout()
 		
 		end
-	
+
 	end
+
+end
+
+function PANEL:RemoveItemNum( num )
+	self.Items[num]:Remove()
+	table.remove( self.Items, num)
+	self:InvalidateLayout()
 
 end
 /*---------------------------------------------------------
@@ -370,7 +379,7 @@ function PANEL:Sort()
 
 	for k, v in pairs(self.Items) do 
 		print("DPanelListFix: k: "..k)
-		if (v == nil) then print("DPanelListFix: found nill element in self.Items{} ")
+		if (v == nil) then print("DPanelListFix: found nill element in self.Items{} ") end
 	end
 
 end
