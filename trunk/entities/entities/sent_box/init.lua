@@ -29,3 +29,7 @@ end
 function ENT:Use(activator,caller)
 	activator:OpenInterface(self:EntIndex())
 end
+
+function ENT:RequestItems(ply)
+	ply:SendItems(self:EntIndex(),self.Items)
+end
