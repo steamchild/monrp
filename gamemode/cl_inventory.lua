@@ -16,11 +16,6 @@ function INVENTORY:Create(x,y,w,h,Index)
 	self.fr:SetEnabled(true)
 	self.fr.PerformLayout2 = self.fr.PerformLayout
 	self.fr.PerformLayout = function(self)
-		if (self.inv) then 
-			self.inv:SetPos(5,25) 
-			self.inv:SetSize(self:GetWide()-10,self:GetTall()-30) 
-			self.inv:PerformLayout()
-		end
 		self.mom:PerformLayout()
 		self:PerformLayout2()
 	end
@@ -29,14 +24,23 @@ function INVENTORY:Create(x,y,w,h,Index)
 		self.mom:Remove()
 	end
 	self.fr.inv = vgui.Create( "DPanelListFix", self.fr )
-		self.fr.inv:SetPos(5,25)
-		self.fr.inv:SetSize(self.Width-10,self.Height-30)
 		self.fr.inv:EnableHorizontal(true)
 		self.fr.inv:EnableVerticalScrollbar()
 		self.fr.inv.DoClick = function(self)
-			self:GetParent():GetParent():GetParent().mom:OnClick(self)
+			self:GetParent():GetParent():GetParent():GetParent().mom:OnClick(self)
 		end
 		self.fr.inv:SetName("wut")
+
+	self.fr.panel = vgui.Create( "DPanel", self.fr )
+
+	self.fr.div = vgui.Create("DVerticalDivider", self.fr)
+		self.fr.div:SetPos(5,25) //Set the top left corner of the divider
+		self.fr.div:SetSize(self.Width-10,self.Height-30) //Set the overall size of the divider
+		self.fr.div:SetTopHeight(self.Height*0.6) //Set the starting width of the left item, the right item will be scaled appropriately.
+		self.fr.div:SetTop(self.fr.inv)
+		self.fr.div:SetBottom(self.fr.panel)
+		self.fr.div:SetDividerHeight(5) //Set the width of the dividing bar.
+
 	self:LoadItems(Entity(Index).Items)
 	self:RequestItems()
 	return self
@@ -77,6 +81,29 @@ function INVENTORY:OnClose()
 end
 
 function INVENTORY:PerformLayout()
+	print("PerFormed")
+	print("HoldPos: ")
+	print(self.fr.div:GetHoldPos())
+	if (self.fr) then
+		self.Width = self.fr:GetWide()
+		self.Height = self.fr:GetTall()
+		self.X, self.Y = self.fr:GetPos()
+	else return end
+	if (self.fr.inv) then 
+	//	self.fr.inv:SetPos(5,25)
+	//	self.fr.inv:SetSize(self.Width-10,self.Height*0.6-25)
+	end
+	if (self.fr.panel) then
+	//	self.fr.panel:SetPos( 5, self.Height*0.6+5)
+	//	self.fr.panel:SetSize( self.Width-10, self.Height*0.4-10)
+	end
+	if (self.fr.div) then
+		local OldHeight = self.fr.div:GetTall()
+		self.fr.div:SetPos( 5,25 )
+		self.fr.div:SetSize( self.Width-10, self.Height-30 )
+		local NewHeight = self.fr.div:GetTall()
+		self.fr.div:SetTopHeight(self.fr.div:GetTopHeight()*(NewHeight/OldHeight))
+	end
 end
 
 function INVENTORY:SetIndex( Index )
