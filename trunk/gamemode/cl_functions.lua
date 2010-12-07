@@ -75,12 +75,12 @@ hook.Add("HUDPaint", "DrawSigns", DrawSigns);
 function DrawInterFace()
 	local Width = 500
 	local Height = 800
-	inv = INVENTORY:Create(ScrW()/2-Width/2,ScrH()/2-Height/2,Width,Height,LocalPlayer())
+	PlayerInv = INVENTORY:Create(ScrW()/2-Width/2,ScrH()/2-Height/2,Width,Height,LocalPlayer())
 	for k=1,40 do
-		inv:AddIcon(LocalPlayer():GetModel())
+		PlayerInv:AddIcon(LocalPlayer():GetModel())
 	end
 	for k=1,20 do
-		inv:RemoveItem(k)
+		PlayerInv:RemoveItem(k)
 	end
 end
 
