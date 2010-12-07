@@ -12,8 +12,7 @@ function INVENTORY:Create(x,y,w,h,Index)
 	self.fr:SetWide(self.Width)
 	self.fr:SetTall(self.Height)
 	self.fr:SetSizable(true)
-	self.fr:SetMouseInputEnabled(true)
-	self.fr:SetEnabled(true)
+	self.fr:MakePopup()
 	self.fr.PerformLayout2 = self.fr.PerformLayout
 	self.fr.PerformLayout = function(self)
 		self.mom:PerformLayout()
@@ -40,7 +39,9 @@ function INVENTORY:Create(x,y,w,h,Index)
 		self.fr.div:SetTop(self.fr.inv)
 		self.fr.div:SetBottom(self.fr.panel)
 		self.fr.div:SetDividerHeight(5) //Set the width of the dividing bar.
-
+	self.fr:SetKeyboardInputEnabled(false)
+	self.fr:SetMouseInputEnabled(true)
+	self.fr:SetVisible(true)
 	self:LoadItems(Entity(Index).Items)
 	self:RequestItems()
 	return self
@@ -71,19 +72,65 @@ function INVENTORY:GetItem(num)
 	end
 end
 
-function INVENTORY:OnClick(Item)
-	print(self.Items[1].Icon)
-	print(self:GetItemNum(Item))
+function INVENTORY:ToggleOutAll()
+	for k, v in pairs(self.Items) do
+		if (v.Icon) then v.Icon:ToggleOut() end
+	end
 end
 
+function INVENTORY:ToggleInAll()
+	for k, v in pairs(self.Items) do
+		if (v.Icon) then v.Icon:ToggleIn() end
+	end
+end
+
+function INVENTORY:ToggleAll()
+	for k, v in pairs(self.Items) do
+		if (v.Icon) then v.Icon:Toggle() end
+	end
+end
+
+function INVENTORY:ToggleIn(num)
+	if (self.Items[num].Icon) then self.Items[num].Icon:ToggleIn() end
+end
+
+function INVENTORY:ToggleOut(num)
+	if (self.Items[num].Icon) then self.Items[num].Icon:ToggleOut() end
+end
+
+function INVENTORY:Toggle(num)
+	if (self.Items[num].Icon) then self.Items[num].Icon:Toggle() end
+end
+
+function INVENTORY:Select(num)
+	for k, v in pairs(self.Items) do
+		if (v.Icon) then
+			if (k != num) then v.Icon:ToggleOut() else v.Icon:ToggleIn() end
+		end
+	end
+end
+
+function INVENTORY:IsToggled(num)
+	return self.Items[num].Icon.Toggled
+end
+
+function INVENTORY:GetToggled()
+	local Toggled = {}
+	for k, v in pairs(self.Items) do
+		if (self:IsToggled(k)) then Toggled[k] = v end
+	end
+end
+
+function INVENTORY:OnClick(Item)
+	local num = self:GetItemNum(Item)
+	if LocalPlayer():KeyDown( IN_SPEED ) then self:Toggle(num) else self:Select(num) end
+end
+
+
 function INVENTORY:OnClose()
- 	print("Closed")
 end
 
 function INVENTORY:PerformLayout()
-	print("PerFormed")
-	print("HoldPos: ")
-	print(self.fr.div:GetHoldPos())
 	if (self.fr) then
 		self.Width = self.fr:GetWide()
 		self.Height = self.fr:GetTall()
@@ -124,7 +171,6 @@ function INVENTORY:Remove()
 	if (self.Index != nil) then
 		Interfaces[self.Index] = nil
 	end
-	print("Removed")
 end
 
 function INVENTORY:GetItemNum(item)
@@ -153,17 +199,12 @@ Interfaces = {}
 -----------------------------------------*/
 
 function ReceiveItems( handler, id, encoded, decoded )
- 
-	print( "Received data on client!" );
 
 	local ENTID = decoded[1]
 	if (ENTID == nil) then return false end
 	local ent = Entity(ENTID)
 	if (ent) then
 		ent.Items = decoded[2]
-		print(ent.Items)
-		print(ENTID)
-		print(ent)
 	end
 	if Interfaces[ENTID] then
 		Interfaces[ENTID]:LoadItems(decoded[2])
@@ -175,20 +216,11 @@ datastream.Hook( "ReceiveItems", ReceiveItems );
 
 local function Done( )
  
-            print( "Done sending." );
- 
 end
 local function Accepted( accepted, tempid, id )
- 
-            if accepted then
-                        print( "Temporary stream " .. tempid .. " was accepted! It's official ID is now " .. id );
-            else
-                        print( "Temporary stream " .. tempid .. " was denied." );
-            end
  
 end
  
 function INVENTORY:RequestItems()
 	local tempid = datastream.StreamToServer( "RequestItems", self:GetIndex(), Done, Accepted );
-	print( "Sent an operation. Our assigned tempid is " .. tempid );
 end

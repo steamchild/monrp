@@ -48,7 +48,9 @@ function PANEL:Init()
 	self:SetBottomUp( false )
 	self:SetNoSizing( false )
 	
-	self:SetMouseInputEnabled( true )
+	self:SetKeyboardInputEnabled(false)
+	self:SetMouseInputEnabled(true)
+	self:SetVisible(true)
 	
 	// This turns off the engine drawing
 	self:SetPaintBackgroundEnabled( false )
@@ -127,9 +129,8 @@ end
 ---------------------------------------------------------*/
 function PANEL:AddIcon(item)
 	if (!item.Model or !item.num) then return end
-		local Icon = vgui.Create("SpawnIcon",self)
+		local Icon = vgui.Create("SpawnIconToggle",self)
 			Icon:SetModel(item.Model)
-			Icon.DoClick2 = Icon.DoClick
 			Icon.DoClick = self.DoClick
 			Icon:SetSize(64,64)
 	self:AddItem(Icon, item.num)
