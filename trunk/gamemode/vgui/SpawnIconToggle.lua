@@ -14,7 +14,7 @@ function PANEL:Init()
 	self.Icon:SetMouseInputEnabled( false )
 	self.Icon:SetKeyboardInputEnabled( false )
 	self.PaintOver = self.PaintOverHovered
-	self.DoPaintOver = false
+	self.Toggled = false
 	
 	self.animPress = Derma_Anim( "Press", self, self.PressedAnim )
 	
@@ -26,15 +26,15 @@ end
    Name: OnMousePressed
 ---------------------------------------------------------*/
 function PANEL:ToggleIn()
-	self.DoPaintOver = true
+	self.Toggled = true
 end
 
 function PANEL:ToggleOut()
-	self.DoPaintOver = false
+	self.Toggled = false
 end
 
 function PANEL:Toggle()
-	self.DoPaintOver = !self.DoPaintOver
+	self.Toggled = !self.Toggled
 end
 
 function PANEL:OnMousePressed( mcode )
@@ -87,7 +87,7 @@ end
 ---------------------------------------------------------*/
 function PANEL:PaintOverHovered()
 
-	if (!self.DoPaintOver) then return end
+	if (!self.Toggled) then return end
 	surface.SetDrawColor( 255, 255, 255, 255 )
 	surface.SetMaterial( matHover )
 	self:DrawTexturedRect()
@@ -112,12 +112,6 @@ function PANEL:SetModel( mdl, iSkin )
 	if (!mdl) then debug.Trace() return end
 
 	self.Icon:SetModel( mdl, iSkin )
-	
-	if ( iSkin && iSkin > 0 ) then
-		self:SetToolTip( Format( "%s (Skin %i)", mdl, iSkin+1 ) )
-	else
-		self:SetToolTip( Format( "%s", mdl ) )
-	end
 
 end
 

@@ -5,6 +5,7 @@ function INVENTORY:Create(x,y,w,h,Index)
 	self.Width = 500
 	self.Height = 800
 	self.Items = {}
+	self.Toggled = {}
 	self.fr = vgui.Create("DFrame")
 	self.fr.mom = self
 	self.fr:SetName("Inventory")
@@ -30,14 +31,24 @@ function INVENTORY:Create(x,y,w,h,Index)
 		end
 		self.fr.inv:SetName("wut")
 
-	self.fr.panel = vgui.Create( "DPanel", self.fr )
+	self.fr.property = vgui.Create( "DPropertySheet", self.fr )
+		self.fr.property:SetPos( 5, 30 )
+		self.fr.property:SetSize( 340, 315 )
+	self.fr.panel = vgui.Create("DPanel", self.fr)
+		self.fr.panel.Paint = function() end
+	self.fr.panel.icon = vgui.Create("SpawnIcon", self.fr.panel)
+	self.fr.panel2 = vgui.Create("DPanel", self.fr)
+		self.fr.panel2.Paint = function() end
+	self.fr.panel2.icon = vgui.Create("SpawnIcon", self.fr.panel2)
+	self.fr.property:AddSheet( "Actions", self.fr.panel, "gui/silkicons/box", false, false, "Get your item" )
+	self.fr.property:AddSheet( "Info", self.fr.panel2, "gui/silkicons/page", false, false, "Information about item" )
 
 	self.fr.div = vgui.Create("DVerticalDivider", self.fr)
 		self.fr.div:SetPos(5,25) //Set the top left corner of the divider
 		self.fr.div:SetSize(self.Width-10,self.Height-30) //Set the overall size of the divider
 		self.fr.div:SetTopHeight(self.Height*0.6) //Set the starting width of the left item, the right item will be scaled appropriately.
 		self.fr.div:SetTop(self.fr.inv)
-		self.fr.div:SetBottom(self.fr.panel)
+		self.fr.div:SetBottom(self.fr.property)
 		self.fr.div:SetDividerHeight(5) //Set the width of the dividing bar.
 	self.fr:SetKeyboardInputEnabled(false)
 	self.fr:SetMouseInputEnabled(true)
@@ -50,11 +61,12 @@ end
 function INVENTORY:AddIcon(Model)
 	local item = {}
 	item.Model = Model
+	item.Class = "prop_physics"
 	self:AddItem(item)
 end
 
 function INVENTORY:AddItem(item)
-	if (!item.Model) then return end
+	if (!item.Model or !item.Class) then return end
 	item.num = table.insert( self.Items, item )
 	self.Items[item.num].Icon=self.fr.inv:AddIcon(item)
 end
@@ -76,49 +88,73 @@ function INVENTORY:ToggleOutAll()
 	for k, v in pairs(self.Items) do
 		if (v.Icon) then v.Icon:ToggleOut() end
 	end
+	self:UpdatePanelIcon()
 end
 
 function INVENTORY:ToggleInAll()
 	for k, v in pairs(self.Items) do
 		if (v.Icon) then v.Icon:ToggleIn() end
 	end
+	self:UpdatePanelIcon()
 end
 
 function INVENTORY:ToggleAll()
 	for k, v in pairs(self.Items) do
 		if (v.Icon) then v.Icon:Toggle() end
 	end
+	self:UpdatePanelIcon()
 end
 
 function INVENTORY:ToggleIn(num)
 	if (self.Items[num].Icon) then self.Items[num].Icon:ToggleIn() end
+	self:UpdatePanelIcon()
 end
 
 function INVENTORY:ToggleOut(num)
 	if (self.Items[num].Icon) then self.Items[num].Icon:ToggleOut() end
+	self:UpdatePanelIcon()
 end
 
 function INVENTORY:Toggle(num)
 	if (self.Items[num].Icon) then self.Items[num].Icon:Toggle() end
+	self:UpdatePanelIcon()
 end
 
 function INVENTORY:Select(num)
 	for k, v in pairs(self.Items) do
 		if (v.Icon) then
-			if (k != num) then v.Icon:ToggleOut() else v.Icon:ToggleIn() end
+			if (k != num) then v.Icon:ToggleOut() else v.Icon:ToggleIn() self:SetIcon(v) end
 		end
 	end
 end
 
 function INVENTORY:IsToggled(num)
+	print("Toggled: ")
+	print(self.Items[num].Icon.Toggled)
 	return self.Items[num].Icon.Toggled
 end
 
 function INVENTORY:GetToggled()
 	local Toggled = {}
+	local num = 0
 	for k, v in pairs(self.Items) do
-		if (self:IsToggled(k)) then Toggled[k] = v end
+		if (self:IsToggled(k)) then print("Toggled") num = num+1 Toggled[num] = v end
 	end
+	return Toggled
+end
+
+function INVENTORY:UpdatePanelIcon()
+	local toggled = self:GetToggled()
+	print(toggled)
+	if (table.Count(toggled) > 1) then return end
+	self:SetIcon(toggled[1])
+end
+
+function INVENTORY:SetIcon(item)
+	self.fr.panel.icon:SetModel(item.Model)
+	self.fr.panel.icon:SetToolTip('Class: "'..item.Class..'"')
+	self.fr.panel2.icon:SetModel(item.Model)
+	self.fr.panel2.icon:SetToolTip('Class: "'..item.Class..'"')
 end
 
 function INVENTORY:OnClick(Item)
@@ -136,20 +172,19 @@ function INVENTORY:PerformLayout()
 		self.Height = self.fr:GetTall()
 		self.X, self.Y = self.fr:GetPos()
 	else return end
-	if (self.fr.inv) then 
-	//	self.fr.inv:SetPos(5,25)
-	//	self.fr.inv:SetSize(self.Width-10,self.Height*0.6-25)
-	end
-	if (self.fr.panel) then
-	//	self.fr.panel:SetPos( 5, self.Height*0.6+5)
-	//	self.fr.panel:SetSize( self.Width-10, self.Height*0.4-10)
-	end
+
 	if (self.fr.div) then
 		local OldHeight = self.fr.div:GetTall()
 		self.fr.div:SetPos( 5,25 )
 		self.fr.div:SetSize( self.Width-10, self.Height-30 )
 		local NewHeight = self.fr.div:GetTall()
 		self.fr.div:SetTopHeight(self.fr.div:GetTopHeight()*(NewHeight/OldHeight))
+	end
+	if (self.fr.panel.icon) then
+		self.fr.panel.icon:SetPos(10,10)
+	end
+	if (self.fr.panel2.icon) then
+		self.fr.panel2.icon:SetPos(10,10)
 	end
 end
 

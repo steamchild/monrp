@@ -133,6 +133,8 @@ function PANEL:AddIcon(item)
 			Icon:SetModel(item.Model)
 			Icon.DoClick = self.DoClick
 			Icon:SetSize(64,64)
+			if (item.Class) then Icon:SetToolTip("Class: "..item.Class) else
+				Icon:SetToolTip("Class: unknown") end
 	self:AddItem(Icon, item.num)
 	return Icon
 end
@@ -184,6 +186,10 @@ end
 /*---------------------------------------------------------
    Name: Rebuild
 ---------------------------------------------------------*/
+function PANEL:SetDynamicSpacing(bSpace)
+	self.DynamicSpace = bSpace
+end
+
 function PANEL:Rebuild()
 
 	local Offset = 0
