@@ -1,0 +1,8 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "models/dishes/plates/plate_001a_4"
+	"$surfaceprop" "tile"
+	"$envmap" "env_cubemap"
+	"$envmapmask" "models/dishes/plates/plate_001a_4_mask"
+	"$model" 1
+}

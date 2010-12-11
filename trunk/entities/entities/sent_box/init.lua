@@ -19,7 +19,10 @@ function ENT:Initialize()
 	self.Entity:SetMoveType(MOVETYPE_VPHYSICS)
 	self.Entity:SetSolid(SOLID_VPHYSICS)
 	self:SetUseType(SIMPLE_USE)
-	
+	self.Functions = {{},{}}
+	self.Items = {}
+	self.svn = 0
+	self.log = {}
 	local phys = self.Entity:GetPhysicsObject()
 
 	if phys and phys:IsValid() then phys:Wake() end
@@ -30,6 +33,31 @@ function ENT:Use(activator,caller)
 	activator:OpenInterface(self:EntIndex())
 end
 
-function ENT:RequestItems(ply)
-	ply:SendItems(self:EntIndex(),self.Items)
+function ENT:AddLog(str)
+	self.svn = self.svn + 1
+	return table.insert(self.log,str)
+end
+
+function ENT:RequestItems(ply,svn)
+	PrintTable(self:GetChanges(svn))
+	ply:SendItems(self:EntIndex(),self:GetChanges(svn),self.svn) //SV_PLAYER
+end
+
+function ENT:GetChanges(svn)
+	local exit = {}
+	for k=svn, table.Count(self.log) do
+		exit[k-svn+1] = self.log[k]
+	end
+	return exit
+end
+
+function ENT:AddEnt(ent)
+	if !ent.Model or !ent.Class then return end
+	table.insert(self.Items,ent)
+	self:AddLog(ent)
+end
+
+function ENT:DelEnt(num)
+	self:AddLog(num)
+	return table.remove(self.Items,num)
 end
