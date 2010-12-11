@@ -53,7 +53,11 @@ function INVENTORY:Create(x,y,w,h,Index)
 	self.fr:SetKeyboardInputEnabled(false)
 	self.fr:SetMouseInputEnabled(true)
 	self.fr:SetVisible(true)
-	self:LoadItems(Entity(Index).Items)
+	if (Entity(Index) and Entity(Index):IsValid()) then
+		if (!Entity(Index).svn and Entity(Index).svn != 0) then Entity(Index).svn = 0 end
+		self.svn = Entity(Index).svn
+		self:LoadItems(Entity(Index).Items)
+	end
 	self:RequestItems()
 	return self
 end
@@ -236,13 +240,30 @@ Interfaces = {}
 function ReceiveItems( handler, id, encoded, decoded )
 
 	local ENTID = decoded[1]
+	print(ENTID)
+	local dec= decoded[2]
+	print(dec)
+	local svn = decoded[3]
+	print(svn)
 	if (ENTID == nil) then return false end
 	local ent = Entity(ENTID)
-	if (ent) then
-		ent.Items = decoded[2]
+	if (!ent.Items) then ent.Items = {} end
+	if (!ent.svn) then ent.svn = -1 end
+	if (ent) then 
+		if (ent.svn < svn) then
+			for k, v in pairs(dec) do
+				if (v) then
+					if (tonumber(v)) then table.remove(ent.Items,v) else table.insert(ent.Items,v) end
+				end
+			end
+		end
+		if (ent.svn > svn) then
+			ent.Items = dec
+		end
+		ent.svn = svn
 	end
 	if Interfaces[ENTID] then
-		Interfaces[ENTID]:LoadItems(decoded[2])
+		Interfaces[ENTID]:LoadItems(ent.Items)
 	end
 	
 
@@ -257,5 +278,6 @@ local function Accepted( accepted, tempid, id )
 end
  
 function INVENTORY:RequestItems()
-	local tempid = datastream.StreamToServer( "RequestItems", self:GetIndex(), Done, Accepted );
+	if (!self.svn) then self.svn = 0 end
+	local tempid = datastream.StreamToServer( "RequestItems", {self:GetIndex(),self.svn}, Done, Accepted );
 end

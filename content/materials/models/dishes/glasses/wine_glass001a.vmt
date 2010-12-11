@@ -1,0 +1,9 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "models/dishes/glasses/wine_glass001a"
+	"$translucent" 1
+	"$surfaceprop" "glassbottle"
+	"$envmap" "env_cubemap"
+	"$envmapmask" "models/dishes/glasses/wine_glass001a_mask"
+	"$model" 1
+}

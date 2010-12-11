@@ -1,0 +1,7 @@
+"Refract"
+{
+	"$normalmap" "rain/rain02"
+	"$dudvmap" "rain/rain02"
+	"$refracttint" "[1 1 1]"
+	"$refractamount" "0.2"
+}
