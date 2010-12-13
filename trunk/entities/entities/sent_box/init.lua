@@ -33,22 +33,13 @@ function ENT:Use(activator,caller)
 	activator:OpenInterface(self:EntIndex())
 end
 
-function ENT:AddLog(str)
+function ENT:AddLog(str) // Logs Changes to sent to client not all items, but only changes
 	self.svn = self.svn + 1
 	return table.insert(self.log,str)
 end
 
-function ENT:RequestItems(ply,svn)
-	PrintTable(self:GetChanges(svn))
-	ply:SendItems(self:EntIndex(),self:GetChanges(svn),self.svn) //SV_PLAYER
-end
-
-function ENT:GetChanges(svn)
-	local exit = {}
-	for k=svn, table.Count(self.log) do
-		exit[k-svn+1] = self.log[k]
-	end
-	return exit
+function ENT:RequestItems(ply,svn) // Called when monrp engine detects incoming stream from client asking items
+	self:SendItems(ply,svn,self.svn) //svn - client's svn; self.svn - entity svn
 end
 
 function ENT:AddEnt(ent)

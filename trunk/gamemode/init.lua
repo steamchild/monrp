@@ -24,6 +24,7 @@ include( "sh_functions.lua" )
 include( "sv_chat.lua" )
 include( "sv_chat_functions.lua" )
 include( "sv_inventory.lua" )
+include( "sv_ents.lua" )
 
 local meta = FindMetaTable("Entity")
 

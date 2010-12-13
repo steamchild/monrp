@@ -237,7 +237,7 @@ Interfaces = {}
 	INVENTORY DATA RECEIVER
 -----------------------------------------*/
 
-function ReceiveItems( handler, id, encoded, decoded )
+function ReceiveItems( handler, id, encoded, decoded ) // Called when Entity calls monrp function to send its items
 
 	local ENTID = decoded[1]
 	print(ENTID)
@@ -253,7 +253,9 @@ function ReceiveItems( handler, id, encoded, decoded )
 		if (ent.svn < svn) then
 			for k, v in pairs(dec) do
 				if (v) then
-					if (tonumber(v)) then table.remove(ent.Items,v) else table.insert(ent.Items,v) end
+					print("k: "..k)
+					print(v)
+					if (tonumber(v) and v <= 0) then table.remove(ent.Items,-v) else table.insert(ent.Items,v) end
 				end
 			end
 		end
@@ -276,8 +278,7 @@ end
 local function Accepted( accepted, tempid, id )
  
 end
- 
-function INVENTORY:RequestItems()
+function INVENTORY:RequestItems() // send request to server
 	if (!self.svn) then self.svn = 0 end
 	local tempid = datastream.StreamToServer( "RequestItems", {self:GetIndex(),self.svn}, Done, Accepted );
 end

@@ -92,7 +92,7 @@ function OpenInterface(ID)
 	Inv = INVENTORY:Create(ScrW()/2-Width/2,ScrH()/2-Height/2,Width,Height,ID)
 end
 
-function OpenCmd( data )
+function OpenCmd( data ) // Server asks to open interface
 	local ID = data:ReadLong()
 	OpenInterface(ID)
 end
