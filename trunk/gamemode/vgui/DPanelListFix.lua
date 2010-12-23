@@ -128,24 +128,23 @@ end
    Name: AddItem
 ---------------------------------------------------------*/
 function PANEL:AddIcon(item)
-	if (!item.Model or !item.num) then return end
+	if (!item.Model) then return end
 		local Icon = vgui.Create("SpawnIconToggle",self)
 			Icon:SetModel(item.Model)
 			Icon.DoClick = self.DoClick
 			Icon:SetSize(64,64)
 			if (item.Class) then Icon:SetToolTip("Class: "..item.Class) else
 				Icon:SetToolTip("Class: unknown") end
-	self:AddItem(Icon, item.num)
+		self:AddItem(Icon)
 	return Icon
 end
-function PANEL:AddItem(item,num)
+function PANEL:AddItem(item)
 
-	if (!item || !item:IsValid() || !num) then return end
+	if (!item || !item:IsValid()) then return end
 
 	item:SetVisible( true )
 	item:SetParent( self:GetCanvas() )
-	if (self.Items[num]) then self.Items[num]:Remove() end
-	self.Items[num] = item
+	table.insert(self.Items,item)
 	
 	self:InvalidateLayout()
 end
