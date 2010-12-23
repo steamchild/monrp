@@ -19,8 +19,9 @@ function ENT:Initialize()
 	self.Entity:SetMoveType(MOVETYPE_VPHYSICS)
 	self.Entity:SetSolid(SOLID_VPHYSICS)
 	self:SetUseType(SIMPLE_USE)
-	self.Functions = {{},{}}
+	self.Functions = {{"Get Item"},{self.GetItem}}
 	self.Items = {}
+	self.Opened = {}
 	self.svn = 0
 	self.log = {}
 	local phys = self.Entity:GetPhysicsObject()
@@ -38,17 +39,73 @@ function ENT:AddLog(str) // Logs Changes to sent to client not all items, but on
 	return table.insert(self.log,str)
 end
 
-function ENT:RequestItems(ply,svn) // Called when monrp engine detects incoming stream from client asking items
-	self:SendItems(ply,svn,self.svn) //svn - client's svn; self.svn - entity svn
+function ENT:CallOpen(ply,svn) // Called when monrp engine detects incoming stream from client asking items
+	self:SendItems(ply,svn,self.svn)
+	self:SendFunctions(ply)
+	table.insert(self.Opened,ply)
 end
 
-function ENT:AddEnt(ent)
+function ENT:CallClose(ply,svn) // Called when monrp engine detects incoming stream from client asking functions
+	for k, v in pairs(self.Opened) do
+		if (v == ply) then table.remove(self.Opened,k) end
+	end
+end
+
+
+function ENT:AddItem(ent)
 	if !ent.Model or !ent.Class then return end
 	table.insert(self.Items,ent)
 	self:AddLog(ent)
 end
 
-function ENT:DelEnt(num)
+function ENT:RemoveItem(num)
 	self:AddLog(num)
 	return table.remove(self.Items,num)
+end
+
+function ENT:GetItem(Toggled)
+	print("GETITEM CALLED")
+	print(Toggled)
+	num = Toggled
+	
+	local item = self.Items[num]
+	if (!item) then return end
+
+ 	local ent = ents.Create(item.Class)
+	if (!ent or !ent:IsValid()) then return end
+		ent:SetModel(item.Model)
+	
+	local boxmaxz = self.Entity:OBBMaxs().z
+
+	local entminz = math.abs(ent:OBBMins().z)
+	local min = ent:OBBMins()
+
+	ent:SetPos( self.Entity:GetPos() + self.Entity:GetAngles():Up() * entminz + self.Entity:GetAngles():Up() * boxmaxz)
+	ent:SetAngles(self.Entity:GetAngles())
+
+	ent:PhysicsInit(SOLID_VPHYSICS)
+	ent:SetMoveType(MOVETYPE_VPHYSICS)
+	ent:SetSolid(SOLID_VPHYSICS)
+
+	self:RemoveItem(num)
+end
+
+function ENT:GetFunctionNames()
+	return self.Functions[1]
+end
+
+function ENT:GetFunctions()
+	return self.Functions[2]
+end
+
+function ENT:GetClientItems()
+	return self.Items
+end
+
+function ENT:GetItems()
+	return self.Items
+end
+
+function ENT:OnRemove( )
+
 end

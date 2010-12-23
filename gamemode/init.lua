@@ -189,5 +189,9 @@ function GM:AcceptStream ( pl, handler, id )
 		if (!pl.LastRequest) then pl.LastRequest = 0 end
 		if (pl.LastRequest<CurTime()-0.2) then pl.LastRequest = CurTime() return true end
 	end
+	if handler == "CallFunction" then
+		if (!pl.LastRequest) then return true end
+	end
+	return false
 end
  
