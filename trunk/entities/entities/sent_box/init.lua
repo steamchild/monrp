@@ -40,12 +40,13 @@ function ENT:AddLog(str) // Logs Changes to sent to client not all items, but on
 end
 
 function ENT:CallOpen(ply,svn) // Called when monrp engine detects incoming stream from client asking items
+	print("set_box: CALLED CALLOPEN")
 	self:SendItems(ply,svn,self.svn)
 	self:SendFunctions(ply)
 	table.insert(self.Opened,ply)
 end
 
-function ENT:CallClose(ply,svn) // Called when monrp engine detects incoming stream from client asking functions
+function ENT:CallClose(ply) // Called when monrp engine detects incoming stream from client asking functions
 	for k, v in pairs(self.Opened) do
 		if (v == ply) then table.remove(self.Opened,k) end
 	end
@@ -77,7 +78,7 @@ function ENT:GetItem(Toggled)
 	
 	local boxmaxz = self.Entity:OBBMaxs().z
 
-	local entminz = math.abs(ent:OBBMins().z)
+	local entminz = -math.abs(ent:OBBMins().z)
 	local min = ent:OBBMins()
 
 	ent:SetPos( self.Entity:GetPos() + self.Entity:GetAngles():Up() * entminz + self.Entity:GetAngles():Up() * boxmaxz)

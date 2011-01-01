@@ -24,7 +24,7 @@ function INVENTORY:Create(x,y,w,h,Index)
 	self.fr.Remove = function(self)
 		self.mom:Remove()
 	end
-	self.fr.inv = vgui.Create( "DPanelList", self.fr )
+	self.fr.inv = vgui.Create( "DPanelListFix", self.fr )
 		self.fr.inv:EnableHorizontal(true)
 		self.fr.inv:EnableVerticalScrollbar()
 		self.fr.inv.DoClick = function(self)
@@ -89,8 +89,7 @@ function INVENTORY:Create(x,y,w,h,Index)
 		self:LoadItems(Entity(Index).Items)
 	end
 	self:RefreshFunctions()
-	self:RequestItems()
-	self:RequestFunctions()
+	self:CallOpen()
 	return self
 end
 
@@ -207,6 +206,8 @@ end
 
 
 function INVENTORY:OnClose()
+	print("INV ONClosed")
+	self:CallClose()
 end
 
 function INVENTORY:PerformLayout()
@@ -300,7 +301,7 @@ Interfaces = {}
 -----------------------------------------*/
 
 function ReceiveItems( handler, id, encoded, decoded ) // Called when Entity calls monrp function to send its items
-
+	print("ITEMS RECEIVED")
 	local ENTID = decoded[1]
 	print(ENTID)
 	local dec= decoded[2]
@@ -310,20 +311,7 @@ function ReceiveItems( handler, id, encoded, decoded ) // Called when Entity cal
 	if (ENTID == nil) then return false end
 	local ent = Entity(ENTID)
 	if (!ent.Items) then ent.Items = {} end
-	if (!ent.svn) then ent.svn = -1 end
-	if (ent) then 
-		if (ent.svn < svn) then
-			for k, v in pairs(dec) do
-				if (v) then
-					if (tonumber(v)) then table.remove(ent.Items,math.abs(v) ) else table.insert(ent.Items,v) end
-				end
-			end
-		end
-		if (ent.svn > svn) then
-			ent.Items = dec
-		end
-		if (ent.svn > -1) then ent.svn = svn end
-	end
+	ent.Items = dec
 	if Interfaces[ENTID] then
 		Interfaces[ENTID]:LoadItems(ent.Items)
 	end
@@ -366,8 +354,7 @@ function INVENTORY:CallOpen() // send request to server
 end
 
 function INVENTORY:CallClose()
-	if (!self.svn) then self.svn = 0 end
-	local tempid = datastream.StreamToServer( "CallClose", {self:GetIndex(),self.svn}, Done, Accepted );
+	local tempid = datastream.StreamToServer( "CallClose", self:GetIndex(), Done, Accepted );
 end
 
 function INVENTORY:RequestFunctions() // send request to server
