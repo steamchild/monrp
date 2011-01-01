@@ -1,14 +1,13 @@
 function CallOpen( ply, handler, id, encoded, decoded ) // Client opened interface
 	local ent = Entity(decoded[1])
 	local svn = decoded[2]
-	if (ent.RequestItems ) then ent:CallOpen(ply,svn) end
+	if (ent.CallOpen ) then ent:CallOpen(ply,svn) end
 end
 datastream.Hook( "CallOpen", CallOpen );
 
 function CallClose( ply, handler, id, encoded, decoded ) // Client opened interface
-	local ent = Entity(decoded[1])
-	local svn = decoded[2]
-	if (ent.RequestItems ) then ent:CallClose(ply,svn) end
+	local ent = Entity(decoded)
+	if (ent.CallClose ) then ent:CallClose(ply) end
 end
 datastream.Hook( "CallClose", CallClose );
 
