@@ -28,9 +28,9 @@ function INVENTORY:Create(x,y,w,h,Index)
 		self.fr.inv:EnableHorizontal(true)
 		self.fr.inv:EnableVerticalScrollbar()
 		self.fr.inv.DoClick = function(self)
-			print(self:GetParent():GetParent():GetParent():GetName())
-			print(self:GetParent():GetParent():GetParent().mom)
-			self:GetParent():GetParent():GetParent().mom:OnClick(self)
+			print(self:GetParent():GetParent():GetParent():GetParent():GetName())
+			print(self:GetParent():GetParent():GetParent():GetParent().mom)
+			self:GetParent():GetParent():GetParent():GetParent().mom:OnClick(self)
 		end
 		self.fr.inv:SetName("wut")
 
@@ -109,6 +109,11 @@ end
 function INVENTORY:RemoveItem(Num)
 	table.remove( self.Items, Num)
 	self.fr.inv:RemoveItemNum( Num )
+end
+
+function INVENTORY:ClearItems()
+	self.Items = {}
+	self.fr.inv:Clear()
 end
 
 function INVENTORY:GetItem(num)
@@ -199,8 +204,11 @@ function INVENTORY:SetIcon(item)
 	self.fr.panel2.icon:SetToolTip('Class: "'..item.Class..'"')
 end
 
-function INVENTORY:OnClick(Item)
-	local num = self:GetItemNum(Item)
+/*----------------------------------------------
+	ON CLICK
+------------------------------------------------*/
+function INVENTORY:OnClick(item)
+	local num = self:GetItemNum(item)
 	if LocalPlayer():KeyDown( IN_SPEED ) then self:Toggle(num) else self:Select(num) end
 end
 
@@ -268,7 +276,7 @@ end
 
 function INVENTORY:LoadItems(Items)
 	if !Items then return end
-	self.Items = {}
+	self:ClearItems()
 	for k, v in pairs(Items) do
 		local item = table.Copy(v)
 		self:AddItem(item)
@@ -304,14 +312,19 @@ function ReceiveItems( handler, id, encoded, decoded ) // Called when Entity cal
 	print("ITEMS RECEIVED")
 	local ENTID = decoded[1]
 	print(ENTID)
-	local dec= decoded[2]
+	local Items= decoded[2]
 	print(dec)
-	local svn = decoded[3]
-	print(svn)
+	local svn_mode = decoded[3]
 	if (ENTID == nil) then return false end
 	local ent = Entity(ENTID)
 	if (!ent.Items) then ent.Items = {} end
-	ent.Items = dec
+
+	if (svn_mode == -1) then ent.Items = Items else
+		for k, v in pairs(Items) do
+			if (tonumber(v)) then table.remove(ent.Items,
+		end
+	end
+
 	if Interfaces[ENTID] then
 		Interfaces[ENTID]:LoadItems(ent.Items)
 	end

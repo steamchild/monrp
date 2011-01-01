@@ -55,7 +55,8 @@ end
 
 function ENT:AddItem(ent)
 	if !ent.Model or !ent.Class then return end
-	table.insert(self.Items,ent)
+	local num = table.insert(self.Items,ent)
+	ent.num = num
 	self:AddLog(ent)
 end
 
