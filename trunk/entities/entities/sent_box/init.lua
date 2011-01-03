@@ -58,11 +58,13 @@ function ENT:AddItem(ent)
 	local num = table.insert(self.Items,ent)
 	ent.num = num
 	self:AddLog(ent)
+	self:RefreshInterFaces()
 end
 
 function ENT:RemoveItem(num)
 	self:AddLog(num)
 	return table.remove(self.Items,num)
+	self:RefreshInterFaces()
 end
 
 function ENT:GetItem(Toggled)
@@ -79,15 +81,13 @@ function ENT:GetItem(Toggled)
 	
 	local boxmaxz = self.Entity:OBBMaxs().z
 
-	local entminz = -math.abs(ent:OBBMins().z)
+	local entminz = math.abs(ent:OBBMins().z)
 	local min = ent:OBBMins()
+	local spawnpos = self.Entity:GetPos() + (self.Entity:GetAngles():Up() * (5+boxmaxz-entminz))
 
-	ent:SetPos( self.Entity:GetPos() + self.Entity:GetAngles():Up() * entminz + self.Entity:GetAngles():Up() * boxmaxz)
+	ent:Initialize()
+	ent:SetPos(pos)
 	ent:SetAngles(self.Entity:GetAngles())
-
-	ent:PhysicsInit(SOLID_VPHYSICS)
-	ent:SetMoveType(MOVETYPE_VPHYSICS)
-	ent:SetSolid(SOLID_VPHYSICS)
 
 	self:RemoveItem(num)
 end
@@ -110,4 +110,10 @@ end
 
 function ENT:OnRemove( )
 
+end
+
+function ENT:RefreshInterFaces()
+	for k, v in pairs(self.Opened) do
+		self:SendItems(v,svn,self.svn)
+	end
 end
