@@ -31,16 +31,17 @@ function ENTITY:GetChanges(svn)
 		for k, add in pairs(adtms) do
 			if (rem == add.num) then match = k break end
 		end
-		if (match != 0) then table.remove(adtms,match) InvisibleDeleted(adtms,match) else
+		if (match != 0) then table.remove(adtms,match) else
 			table.insert(final,rem)
 		end
+		InvDeleted(adtms,rem)
 	end
 
 	local mode
-	if (table.Count(adtms) > table.Count(added)) then
-		mode = -1 final = self:GetItems()
+	if (table.Count(adtms) >= table.Count(self:GetItems())) then
+		mode = false final = self:GetItems()
 	else
-		mode = svn table.Add(final,adtms)
+		mode = true table.Add(final,adtms)
 	end
 	return final, mode
 end
@@ -48,7 +49,7 @@ end
 function ENTITY:SendItems(ply,svn,entsvn) // Entity calls this function to send its items to client
 	local Log, mode = self:GetChanges(svn)
 	local ENTID = self:EntIndex()
-	datastream.StreamToClients( ply,  "ReceiveItems", {ENTID,Log,mode} )
+	datastream.StreamToClients( ply,  "ReceiveItems", {ENTID,Log,mode,svn} )
 end
 
 function ENTITY:SendFunctions(ply) // Entity calls this function to send its items to client
@@ -61,8 +62,14 @@ end
 	USEFULL STUFF
 -----------------------------------------------*/
 
-local function InvisibleDeleted(ar,num)
+function InvDeleted(ar,num)
+	local doremove = true
 	for k, v in pairs(ar) do
-		if (v.num > num) then v.num = v.num - 1 end
+		if (v.num == num) then doremove = false break end
+	end
+	if (doremove) then
+		for k, v in pairs(ar) do
+			if (v.num > num) then v.num = v.num - 1 end
+		end
 	end
 end

@@ -314,19 +314,29 @@ function ReceiveItems( handler, id, encoded, decoded ) // Called when Entity cal
 	print(ENTID)
 	local Items= decoded[2]
 	print(dec)
-	local svn_mode = decoded[3]
+	local mode = decoded[3]
+	local svn = decoded[4]
 	if (ENTID == nil) then return false end
 	local ent = Entity(ENTID)
 	if (!ent.Items) then ent.Items = {} end
 
-	if (svn_mode == -1) then ent.Items = Items else
+	if (!mode) then ent.Items = Items else
 		for k, v in pairs(Items) do
-			if (tonumber(v)) then table.remove(ent.Items,
+			if (tonumber(v)) then table.remove(ent.Items,v) else
+			end
+		end
+		for k, v in pairs(Items) do
+			if (!tonumber(v)) then
+				ent.Items[v.num] = v
+				ent.Items[v.num].num = nil
+			end
 		end
 	end
+	ent.svn = svn
 
 	if Interfaces[ENTID] then
 		Interfaces[ENTID]:LoadItems(ent.Items)
+		Interfaces[ENTID].svn = svn
 	end
 	
 
