@@ -22,6 +22,7 @@ function ENT:Initialize()
 	self.Functions = {{"Get Item"},{self.GetItem}}
 	self.Items = {}
 	self.Opened = {}
+	self.OpenedSvns = {}
 	self.svn = 0
 	self.log = {}
 	local phys = self.Entity:GetPhysicsObject()
@@ -41,14 +42,16 @@ end
 
 function ENT:CallOpen(ply,svn) // Called when monrp engine detects incoming stream from client asking items
 	print("set_box: CALLED CALLOPEN")
+	print("CALLER SVN:"..svn)
 	self:SendItems(ply,svn,self.svn)
 	self:SendFunctions(ply)
+	self.OpenedSvns[ply:EntIndex()] = self.svn 
 	table.insert(self.Opened,ply)
 end
 
 function ENT:CallClose(ply) // Called when monrp engine detects incoming stream from client asking functions
 	for k, v in pairs(self.Opened) do
-		if (v == ply) then table.remove(self.Opened,k) end
+		if (v == ply) then self.OpenedSvns[ply:EntIndex()] = nil table.remove(self.Opened,k) end
 	end
 end
 
@@ -59,12 +62,13 @@ function ENT:AddItem(ent)
 	ent.num = num
 	self:AddLog(ent)
 	self:RefreshInterFaces()
+	return num
 end
 
 function ENT:RemoveItem(num)
 	self:AddLog(num)
-	return table.remove(self.Items,num)
 	self:RefreshInterFaces()
+	return table.remove(self.Items,num)
 end
 
 function ENT:GetItem(Toggled)
@@ -85,9 +89,9 @@ function ENT:GetItem(Toggled)
 	local min = ent:OBBMins()
 	local spawnpos = self.Entity:GetPos() + (self.Entity:GetAngles():Up() * (5+boxmaxz-entminz))
 
-	ent:Initialize()
-	ent:SetPos(pos)
+	ent:SetPos(spawnpos)
 	ent:SetAngles(self.Entity:GetAngles())
+	ent:Spawn()
 
 	self:RemoveItem(num)
 end
@@ -114,6 +118,7 @@ end
 
 function ENT:RefreshInterFaces()
 	for k, v in pairs(self.Opened) do
-		self:SendItems(v,svn,self.svn)
+		self:SendItems(v,self.OpenedSvns[v:EntIndex()],self.svn)
+		self.OpenedSvns[v:EntIndex()] = self.svn 
 	end
 end
