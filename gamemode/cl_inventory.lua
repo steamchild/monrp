@@ -109,6 +109,9 @@ end
 function INVENTORY:RemoveItem(Num)
 	table.remove( self.Items, Num)
 	self.fr.inv:RemoveItemNum( Num )
+	if (self.Items[Num]) then self:ToggleIn(Num) else
+		if (self.Items[Num-1]) then self:ToggleIn(Num-1) end
+	end
 end
 
 function INVENTORY:ClearItems()
@@ -316,8 +319,13 @@ function ReceiveItems( handler, id, encoded, decoded ) // Called when Entity cal
 	print(dec)
 	local mode = decoded[3]
 	local svn = decoded[4]
+	print("cl_inventory.mode:")
+	print(mode)
+	print("cl_inventory.ENTID: "..ENTID)
+	print("cl_inventory.svn: "..svn)
 	if (ENTID == nil) then return false end
 	local ent = Entity(ENTID)
+
 	if (!ent.Items) then ent.Items = {} end
 
 	if (!mode) then ent.Items = Items else

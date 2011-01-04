@@ -6,9 +6,15 @@ local ENTITY = FindMetaTable("Entity")
 
 function ENTITY:GetChanges(svn)
 	local Log = {}
-	for k=svn, self.svn do
+	print("SV_ENTS.SVN:")
+	print(svn)
+
+	local k = svn
+	while k < self.svn do
+		k = k + 1
 		Log[k-svn+1] = self.log[k]
 	end
+
 	print("sv_ents/Log: ")
 	PrintTable(Log)
 
@@ -49,7 +55,7 @@ end
 function ENTITY:SendItems(ply,svn,entsvn) // Entity calls this function to send its items to client
 	local Log, mode = self:GetChanges(svn)
 	local ENTID = self:EntIndex()
-	datastream.StreamToClients( ply,  "ReceiveItems", {ENTID,Log,mode,svn} )
+	datastream.StreamToClients( ply,  "ReceiveItems", {ENTID,Log,mode,entsvn} )
 end
 
 function ENTITY:SendFunctions(ply) // Entity calls this function to send its items to client
