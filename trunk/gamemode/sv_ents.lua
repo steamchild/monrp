@@ -15,7 +15,7 @@ function ENTITY:GetChanges(svn)
 		Log[k-svn+1] = self.log[k]
 	end
 
-	print("sv_ents/Log: ")
+	print("sv_ents: analys Log: ")
 	PrintTable(Log)
 
 	local adtms = {}

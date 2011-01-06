@@ -15,13 +15,13 @@ function CallFunction( ply, handler, id, encoded, decoded ) // Client requesting
 	local ent = Entity(decoded[1])
 	local Toggled = decoded[2]
 	local Toggled2 = table.Copy(Toggled)
-	print("SERVER TOGGLED: ")
+	print("SV_INVENTORY: SERVER TOGGLED: ")
 	PrintTable(Toggled2)
 	local func = decoded[3]
 	if (ent and ent:IsValid()) then
 		ent.ToggleBuf = Toggled2
 		for k, v in pairs(ent:GetFunctionNames()) do
-			if (func == v) then print("CALLED") ent:GetFunctions()[k](ent,1) end
+			if (func == v) then print("SV_INVENTORY: CALLED") ent:GetFunctions()[k](ent,Toggled2) end
 		end
 	end
 end
