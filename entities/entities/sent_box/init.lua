@@ -71,29 +71,39 @@ function ENT:RemoveItem(num)
 	return table.remove(self.Items,num)
 end
 
+function ENT:RemoveItems(nums)
+	for k, v in pairs(nums) do
+		self:AddLog(v)
+		table.remove(self.Items,num)
+	end
+	self:RefreshInterFaces()
+end
+
 function ENT:GetItem(Toggled)
 	print("GETITEM CALLED")
 	print(Toggled)
-	num = Toggled
+	for k, v in pairs(Toggled) do
+		num = v
+		
+		local item = self.Items[num]
+		if (!item) then return end
 	
-	local item = self.Items[num]
-	if (!item) then return end
-
- 	local ent = ents.Create(item.Class)
-	if (!ent or !ent:IsValid()) then return end
-		ent:SetModel(item.Model)
+	 	local ent = ents.Create(item.Class)
+		if (!ent or !ent:IsValid()) then return end
+			ent:SetModel(item.Model)
+		
+		local boxmaxz = self.Entity:OBBMaxs().z
 	
-	local boxmaxz = self.Entity:OBBMaxs().z
-
-	local entminz = math.abs(ent:OBBMins().z)
-	local min = ent:OBBMins()
-	local spawnpos = self.Entity:GetPos() + (self.Entity:GetAngles():Up() * (5+boxmaxz-entminz))
-
-	ent:SetPos(spawnpos)
-	ent:SetAngles(self.Entity:GetAngles())
-	ent:Spawn()
-
-	self:RemoveItem(num)
+		local entminz = math.abs(ent:OBBMins().z)
+		local min = ent:OBBMins()
+		local spawnpos = self.Entity:GetPos() + (self.Entity:GetAngles():Up() * (5+boxmaxz-entminz))
+	
+		ent:SetPos(spawnpos)
+		ent:SetAngles(self.Entity:GetAngles())
+		ent:Spawn()
+	
+	end
+	self:RemoveItems(Toggled)
 end
 
 function ENT:GetFunctionNames()

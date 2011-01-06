@@ -188,7 +188,7 @@ function INVENTORY:GetToggledNums()
 	local Toggled = {}
 	local num = 0
 	for k, v in pairs(self.Items) do
-		if (self:IsToggled(k)) then num = num+1 Toggled[num] = k end
+		if (self:IsToggled(k)) then num = num+1 Toggled[num] = k print("TOGGLED FOUND") end
 	end
 	return Toggled
 end
@@ -321,8 +321,6 @@ function ReceiveItems( handler, id, encoded, decoded ) // Called when Entity cal
 	local svn = decoded[4]
 	print("cl_inventory.mode:")
 	print(mode)
-	print("cl_inventory.ENTID: "..ENTID)
-	print("cl_inventory.svn: "..svn)
 	if (ENTID == nil) then return false end
 	local ent = Entity(ENTID)
 
