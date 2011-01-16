@@ -74,7 +74,7 @@ end
 function ENT:RemoveItems(nums)
 	for k, v in pairs(nums) do
 		self:AddLog(v)
-		table.remove(self.Items,num)
+		table.remove(self.Items,v)
 	end
 	self:RefreshInterFaces()
 end
@@ -96,7 +96,8 @@ function ENT:GetItem(Toggled)
 	
 		local entminz = math.abs(ent:OBBMins().z)
 		local min = ent:OBBMins()
-		local spawnpos = self.Entity:GetPos() + (self.Entity:GetAngles():Up() * (5+boxmaxz-entminz))
+		local spawnpos = self.Entity:GetPos() + 
+			(self.Entity:GetAngles():Up() * (5+math.abs(boxmaxz)+math.abs(entminz)))
 	
 		ent:SetPos(spawnpos)
 		ent:SetAngles(self.Entity:GetAngles())
