@@ -20,6 +20,7 @@ function ENT:Initialize()
 	self.Entity:SetSolid(SOLID_VPHYSICS)
 	self:SetUseType(SIMPLE_USE)
 	self.Functions = {{"Get Item"},{self.GetItem}}
+	self.Commands = {{"Open","Close"},{self.Open,self.Close}}
 	self.Items = {}
 	self.Opened = {}
 	self.OpenedSvns = {}
@@ -44,7 +45,8 @@ function ENT:CallOpen(ply,svn) // Called when monrp engine detects incoming stre
 	print("set_box: CALLED CALLOPEN")
 	print("CALLER SVN:"..svn)
 	self:SendItems(ply,svn,self.svn)
-	self:SendFunctions(ply)
+	self:SendFunctions(ply,self.Functions)
+	self:SendCommands(ply,self.Commands)
 	self.OpenedSvns[ply:EntIndex()] = self.svn 
 	table.insert(self.Opened,ply)
 end
@@ -79,7 +81,63 @@ function ENT:RemoveItems(nums)
 	self:RefreshInterFaces()
 end
 
-function ENT:GetItem(Toggled)
+function ENT:GetFunctionNames()
+	return self.Functions[1]
+end
+
+function ENT:GetFunctions()
+	return self.Functions[2]
+end
+
+function ENT:GetCommandNames()
+	return self.Commands[1]
+end
+
+function ENT:GetCommands()
+	return self.Commands[2]
+end
+
+function ENT:GetClientItems()
+	return self.Items
+end
+
+function ENT:GetItems()
+	return self.Items
+end
+
+function ENT:OnRemove( )
+
+end
+
+/*----------------------------------------
+	FUNCTIONS AND COMMANDS
+----------------------------------------*/
+
+function ENT:RefreshInterFaces()
+	for k, v in pairs(self.Opened) do
+		self:SendItems(v,self.OpenedSvns[v:EntIndex()],self.svn)
+		self.OpenedSvns[v:EntIndex()] = self.svn 
+	end
+end
+
+function ENT:Open(activator)
+	print("ENT:OPEN() CALLED")
+
+	local explode = ents.Create( "env_explosion" )
+		explode:SetPos( self:GetPos() )
+		explode:SetOwner( self )
+		explode:Spawn()
+		explode:SetKeyValue( "iMagnitude", "100" )
+		explode:Fire( "Explode", 0, 0 )
+		explode:EmitSound( "weapon_AWP.Single", 400, 400 )
+	self:Remove()
+end
+
+function ENT:Close(activator)
+	print("ENT:Close() CALLED")
+end
+
+function ENT:GetItem(activator,Toggled)
 	print("GETITEM CALLED")
 	print(Toggled)
 	for k, v in pairs(Toggled) do
@@ -105,31 +163,4 @@ function ENT:GetItem(Toggled)
 	
 	end
 	self:RemoveItems(Toggled)
-end
-
-function ENT:GetFunctionNames()
-	return self.Functions[1]
-end
-
-function ENT:GetFunctions()
-	return self.Functions[2]
-end
-
-function ENT:GetClientItems()
-	return self.Items
-end
-
-function ENT:GetItems()
-	return self.Items
-end
-
-function ENT:OnRemove( )
-
-end
-
-function ENT:RefreshInterFaces()
-	for k, v in pairs(self.Opened) do
-		self:SendItems(v,self.OpenedSvns[v:EntIndex()],self.svn)
-		self.OpenedSvns[v:EntIndex()] = self.svn 
-	end
 end

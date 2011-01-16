@@ -39,10 +39,14 @@ function ENTITY:SendItems(ply,svn,entsvn) // Entity calls this function to send 
 	datastream.StreamToClients( ply,  "ReceiveItems", {ENTID,Log,mode,entsvn} )
 end
 
-function ENTITY:SendFunctions(ply) // Entity calls this function to send its items to client
+function ENTITY:SendFunctions(ply,functions) // Entity calls this function to send its items to client
 	local ENTID = self:EntIndex()
-	local functions = self:GetFunctionNames()
-	datastream.StreamToClients( ply,  "ReceiveFunctions", {ENTID,functions} )
+	datastream.StreamToClients( ply,  "ReceiveFunctions", {ENTID,functions[1]} )
+end
+
+function ENTITY:SendCommands(ply,commands) // Entity calls this function to send its items to client
+	local ENTID = self:EntIndex()
+	datastream.StreamToClients( ply,  "ReceiveCommands", {ENTID,commands[1]} )
 end
 
 /*---------------------------------------------
