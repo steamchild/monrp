@@ -19,10 +19,21 @@ function CallFunction( ply, handler, id, encoded, decoded ) // Client requesting
 	PrintTable(Toggled2)
 	local func = decoded[3]
 	if (ent and ent:IsValid()) then
-		ent.ToggleBuf = Toggled2
 		for k, v in pairs(ent:GetFunctionNames()) do
-			if (func == v) then print("SV_INVENTORY: CALLED") ent:GetFunctions()[k](ent,Toggled2) end
+			if (func == v) then print("SV_INVENTORY: CALLED") ent:GetFunctions()[k](ent,ply,Toggled2) end
 		end
 	end
 end
 datastream.Hook( "CallFunction", CallFunction );
+
+function CallCommand( ply, handler, id, encoded, decoded ) // Client requesting items
+	print("SV_CALLCOMMAND CALLED")
+	local ent = Entity(decoded[1])
+	local cmd = decoded[2]
+	if (ent and ent:IsValid()) then
+		for k, v in pairs(ent:GetCommandNames()) do
+			if (cmd == v) then print("SV_INVENTORY: CALLED") ent:GetCommands()[k](ent,ply) end
+		end
+	end
+end
+datastream.Hook( "CallCommand", CallCommand );

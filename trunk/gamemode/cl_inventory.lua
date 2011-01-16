@@ -34,6 +34,30 @@ function INVENTORY:Create(x,y,w,h,Index)
 		end
 		self.fr.inv:SetName("wut")
 
+	self.fr.div1 = vgui.Create("DVerticalDivider", self.fr)
+	self.fr.div1.cmdpanel = vgui.Create("DPanel",self.fr)
+	self.fr.div1.cmdpanel.icon = vgui.Create("SpawnIcon", self.fr.div1.cmdpanel)
+		if (Entity(self:GetIndex())) then self.fr.div1.cmdpanel.icon:SetModel(Entity(self:GetIndex()):GetModel()) end
+	self.fr.div1.cmdpanel.list = vgui.Create("DPanelList",self.fr.div1.cmdpanel)
+	self.fr.div1.cmdpanel.list:EnableVerticalScrollbar()
+		self.fr.div1:SetPos(10,10) //Set the top left corner of the divider
+		self.fr.div1:SetSize(self.Width-10,self.Height-30) //Set the overall size of the divider
+		self.fr.div1:SetTopHeight(74) //Set the starting width of the left item, the right item will be scaled appropriately.
+		self.fr.div1:SetTopMin(74)
+		self.fr.div1:SetTop(self.fr.div1.cmdpanel)
+		self.fr.div1:SetBottom(self.fr.inv)
+		self.fr.div1:SetDividerHeight(5) //Set the width of the dividing bar
+		self.fr.div1.PerformLayout2 = self.fr.div1.PerformLayout
+		self.fr.div1.PerformLayout = function(self)
+			self.cmdpanel.icon:SetPos(5,5)
+			local lx,ly = self.cmdpanel.icon:GetPos()
+			local lwide,ltall = self.cmdpanel.icon:GetSize()
+			self.cmdpanel.list:SetPos(lx+lwide+5,ly)
+			self.cmdpanel.list:SetSize(self.cmdpanel:GetWide()-lwide-lx-(5*2),self.cmdpanel:GetTall()-(ly*2))
+			self:PerformLayout2()
+		end
+	self.fr.div1:PerformLayout()
+
 	self.fr.property = vgui.Create( "DPropertySheet", self.fr )
 		self.fr.property:SetPos( 5, 30 )
 		self.fr.property:SetSize( 340, 315 )
@@ -76,10 +100,12 @@ function INVENTORY:Create(x,y,w,h,Index)
 	self.fr.div = vgui.Create("DVerticalDivider", self.fr)
 		self.fr.div:SetPos(5,25) //Set the top left corner of the divider
 		self.fr.div:SetSize(self.Width-10,self.Height-30) //Set the overall size of the divider
-		self.fr.div:SetTopHeight(self.Height*0.6) //Set the starting width of the left item, the right item will be scaled appropriately.
-		self.fr.div:SetTop(self.fr.inv)
+		self.fr.div:SetTopHeight(self.Height*0.7) //Set the starting width of the left item, the right item will be scaled appropriately.
+		self.fr.div:SetTop(self.fr.div1)
 		self.fr.div:SetBottom(self.fr.property)
 		self.fr.div:SetDividerHeight(5) //Set the width of the dividing bar.
+		self.fr.div:SetTopMin(64)
+		self.fr.div:SetBottomMin(64)
 	self.fr:SetKeyboardInputEnabled(false)
 	self.fr:SetMouseInputEnabled(true)
 	self.fr:SetVisible(true)
@@ -228,23 +254,13 @@ function INVENTORY:PerformLayout()
 		self.X, self.Y = self.fr:GetPos()
 	else return end
 
-	if (self.fr.div) then
 		local OldHeight = self.fr.div:GetTall()
 		self.fr.div:SetPos( 5,25 )
 		self.fr.div:SetSize( self.Width-10, self.Height-30 )
 		local NewHeight = self.fr.div:GetTall()
 		self.fr.div:SetTopHeight(self.fr.div:GetTopHeight()*(NewHeight/OldHeight))
-	end
-	if (self.fr.panel.icon) then
 		self.fr.panel.icon:SetPos(10,10)
-	end
-	if (self.fr.panel2.icon) then
 		self.fr.panel2.icon:SetPos(10,10)
-	end
-	
-	if (self.fr.panel.ListFunc) then
-	end
-
 end
 
 function INVENTORY:SetIndex( Index )
@@ -301,6 +317,25 @@ function INVENTORY:RefreshFunctions()
 					self.mom:CallFunction(self:GetText())
 				end
 			self.fr.panel.ListFunc:AddItem(button)
+		end
+	end
+end
+
+function INVENTORY:RefreshCommands()
+	local ent = Entity(self:GetIndex())
+	self.fr.div1.cmdpanel.list:Clear()
+	if (ent and ent:IsValid() and ent.InvFunctions) then
+		for k, v in pairs(ent.InvCommands) do
+			local button = vgui.Create( "DButton", self.fr.panel.ListFunc )
+				button:SetSize( 128, 16 )
+				button:SetPos( 200, 20 )
+				button:SetText( v )
+				button.mom = self
+				button.DoClick =  function( self )
+					print("PRESSED")
+					self.mom:CallCommand(self:GetText())
+				end
+			self.fr.div1.cmdpanel.list:AddItem(button)
 		end
 	end
 end
@@ -365,6 +400,24 @@ function ReceiveFunctions( handler, id, encoded, decoded ) // Called when Entity
 	end
 end
 datastream.Hook( "ReceiveFunctions", ReceiveFunctions );
+
+
+function ReceiveCommands( handler, id, encoded, decoded ) // Called when Entity calls monrp function to send its items
+	local ENTID = decoded[1]
+	local commands = decoded[2]
+	print("Commands: ")
+	print(commands)
+	if (commands) then
+		PrintTable(commands)
+	end
+	local ent = Entity(ENTID)
+	if ( !ent or !ent:IsValid() ) then return end
+	ent.InvCommands = commands
+	if Interfaces[ENTID] then
+		Interfaces[ENTID]:RefreshCommands()
+	end
+end
+datastream.Hook( "ReceiveCommands", ReceiveCommands );
  
 local function Done( )
  
@@ -395,4 +448,9 @@ function INVENTORY:CallFunction(func) // send request to server
 	print("CALLED: "..func)
 	PrintTable(self:GetToggledNums())
 	datastream.StreamToServer( "CallFunction", {self:GetIndex(),self:GetToggledNums(),func} );
+end
+
+function INVENTORY:CallCommand(cmd) // send request to server
+	print("CALLED: "..cmd)
+	datastream.StreamToServer( "CallCommand", {self:GetIndex(),cmd} );
 end
