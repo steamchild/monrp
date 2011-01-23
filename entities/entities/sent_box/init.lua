@@ -26,6 +26,8 @@ function ENT:Initialize()
 	self.OpenedSvns = {}
 	self.svn = 0
 	self.log = {}
+	self.logdeep = 20
+	self.Closed = true
 	local phys = self.Entity:GetPhysicsObject()
 
 	if phys and phys:IsValid() then phys:Wake() end
@@ -74,6 +76,9 @@ function ENT:RemoveItem(num)
 end
 
 function ENT:RemoveItems(nums)
+	for k, v in pairs(nums) do 
+		InvRemoved(v,nums)
+	end
 	for k, v in pairs(nums) do
 		self:AddLog(v)
 		table.remove(self.Items,v)
@@ -109,6 +114,10 @@ function ENT:OnRemove( )
 
 end
 
+function ENT:OnTakeDamage(dmg)
+	self:TakePhysicsDamage(dmg)
+end
+
 /*----------------------------------------
 	FUNCTIONS AND COMMANDS
 ----------------------------------------*/
@@ -121,20 +130,11 @@ function ENT:RefreshInterFaces()
 end
 
 function ENT:Open(activator)
-	print("ENT:OPEN() CALLED")
-
-	local explode = ents.Create( "env_explosion" )
-		explode:SetPos( self:GetPos() )
-		explode:SetOwner( self )
-		explode:Spawn()
-		explode:SetKeyValue( "iMagnitude", "100" )
-		explode:Fire( "Explode", 0, 0 )
-		explode:EmitSound( "weapon_AWP.Single", 400, 400 )
-	self:Remove()
+	self.Closed = false
 end
 
 function ENT:Close(activator)
-	print("ENT:Close() CALLED")
+	self.Closed = true
 end
 
 function ENT:GetItem(activator,Toggled)
@@ -164,3 +164,29 @@ function ENT:GetItem(activator,Toggled)
 	end
 	self:RemoveItems(Toggled)
 end
+
+function ENT:PhysicsCollide( data, physobj )
+	if (!self.Closed) then 
+		local ent = data.HitEntity
+		if (ent and ent:IsValid() and !ent:IsWorld() and !ent:IsPlayer() and physobj:IsValid() and physobj:IsMoveable()) then
+			local pos = self:WorldToLocal( data.HitPos )
+			if (pos.z>23 and math.abs(pos.x) < 12 and math.abs(pos.y) < 12) then
+				local item = {
+					Model = ent:GetModel(),
+					Class = ent:GetClass()
+				}
+				self:AddItem(item)
+				ent:Remove()
+			end
+		end
+	end
+end
+
+function InvRemoved(val,tab)
+	tab2 = table.Copy(tab)
+	for k, v in pairs(tab2) do
+		if v>val then v = v-1 end
+	end
+	return tab2
+end
+

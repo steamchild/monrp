@@ -185,6 +185,22 @@ function ply:TakeMoneyUSD(amount)
 	if (self.USD-amount>=0) then self.USD=self.USD-amount self:SendData({"USD"},{self.USD}) return true end
 	return false
 end
+/*-------------------------------------------
+	USE WITH CARE
+--------------------------------------------*/
+function ply:ForceTakeMoneyEUR(amount)
+	self.EUR=self.EUR-amount self:SendData({"EUR"},{self.EUR})
+	if (self.EUR < 0) then return false else return true end
+end
+
+function ply:ForceTakeMoneyUSD(amount)
+	self.USD=self.USD-amount self:SendData({"USD"},{self.USD})
+	if (self.USD < 0) then return false else return true end
+end
+
+/*-------------------------------------------
+	USE WITH CARE
+--------------------------------------------*/
 
 function ply:MrpDropWeapon(wep)
 	if (wep) then 
@@ -235,4 +251,11 @@ function ply:OpenInterface(ID)
 	umsg.Start( "OpenInterface" );
 		umsg.Long( ID );
 	umsg.End();
+end
+
+//---------------------------------------------------
+//	OWNING
+//---------------------------------------------------
+function ply:AddRealty(core)
+	table.insert(ply.Realty,core)
 end

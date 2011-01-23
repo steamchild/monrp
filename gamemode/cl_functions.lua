@@ -65,6 +65,36 @@ function DrawSigns()
 			draw.TextShadow( izi, 1, 200 )
 		end
 	end
+
+
+	local traceent = LocalPlayer():GetEyeTrace().Entity
+	local txtoffset = 32
+	local Color1 = Color(255,255,255,255)
+	local Color2 = Color(100,0,0,255)
+	local centerx = ScrW()/2
+	local centery = ScrH()/2-txtoffset
+	if (traceent and traceent:IsValid() and traceent:IsDoor()) then
+		if (traceent:IsOwner(LocalPlayer()) ) then
+			local names
+			if (traceent:MrpGetOwners()) then
+				names = ""
+				for k, v in pairs(traceent:MrpGetOwners()) do
+					names = names..v:GetName().."\n"
+				end
+			end
+			local text = "Owned By:\n"..names
+					draw.DrawText(text, "TargetID", centerx , centery+1 , Color(0, 0, 0, 200), 1)
+					draw.DrawText(text, "TargetID", centerx, centery, Color(255, 255, 255, 200), 1)
+		else
+			if (!names) then 
+					draw.DrawText("Not Owned", "TargetID", centerx , centery+1 , Color(0, 0, 0, 255), 1)
+					draw.DrawText("Not Owned", "TargetID", centerx, centery, Color(128, 30, 30, 255), 1)
+			else 
+					draw.DrawText("You Dont Own This", "TargetID", centerx , centery+1 , Color(0, 0, 0, 255), 1)
+					draw.DrawText("You Dont Own This", "TargetID", centerx, centery, Color(128, 30, 30, 255), 1)
+			end
+		end
+	end
 end
 hook.Add("HUDPaint", "DrawSigns", DrawSigns);
 

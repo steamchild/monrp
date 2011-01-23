@@ -11,6 +11,9 @@ AddCSLuaFile( "sh_functions.lua" )
 AddCSLuaFile( "addstuff.lua" )
 AddCSLuaFile( "cl_functions.lua" )
 AddCSLuaFile( "cl_inventory.lua" )
+AddCSLuaFile( "cl_datastreams.lua" )
+AddCSLuaFile( "cl_ents.lua" )
+AddCSLuaFile( "cl_special.lua" )
 
 //VGUI
 AddCSLuaFile( "vgui/DPanelListEnts.lua" )
@@ -25,6 +28,8 @@ include( "sv_chat.lua" )
 include( "sv_chat_functions.lua" )
 include( "sv_inventory.lua" )
 include( "sv_ents.lua" )
+include( "sv_auction.lua" )
+include( "sv_datastreams.lua" )
 
 local meta = FindMetaTable("Entity")
 
@@ -69,6 +74,11 @@ function GM:PlayerInitialSpawn( ply )
 		ply:WriteValues(PlayerSaveKeyValues) 
 	end
 	ply:SendData( {"USD","EUR","GroupID","Fatigue","Hunger","MrpName"},{ply.USD,ply.EUR,ply.Group.ID,ply.Fatigue,ply.Hunger,ply.MrpName} )
+	local recep = RecipientFilter()
+		recep:AddPlayer(ply)
+	for k, v in pairs(ents.FindDoors()) do
+		v:SendDoorData(door,recep)
+	end
 	ply:SetName("unknown")
 end
  
@@ -189,9 +199,17 @@ function GM:AcceptStream ( pl, handler, id )
 		if (!pl.LastRequest) then pl.LastRequest = 0 end
 		if (pl.LastRequest<CurTime()-0.2) then pl.LastRequest = CurTime() return true end
 	end
-	if handler == "CallFunction" or handler == "CallCommand" then
+	if handler == "CallFunction" or handler == "CallCommand" or handler == "Auc_AddPrice" 
+	or handler == "AucClz" or handler == "AucOpn"  then
 		return true 
 	end
 	return false
+end
+
+function GM:EntityKeyValue(  ent,  key,  value )
+	if (string.sub(key,0,4) == "lua_") then
+		print("LUA_ DETECTED: "..key)
+		ent[ string.sub(key,5) ]=value
+	end
 end
  
