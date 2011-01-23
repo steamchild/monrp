@@ -17,15 +17,17 @@ Group.Weapons = {}
 	for k, v in pairs(Weapons) do
 		Group.Weapons[k] = Weapons[k] 
 	end
+Group.Enum = math.pow(2,table.Count(Groups)+1)
 Groups[table.Count(Groups) + 1] = Group
 return Group
 end
 
 local CITIZEN_WEAPONS = {
-"gmod_tool",
 "weapon_physgun",
+"gmod_tool",
 "weapon_physcannon",
-"gmod_camera"
+"gmod_camera",
+"mrp_keys"
 }
 
 local CITIZEN_MODELS = {

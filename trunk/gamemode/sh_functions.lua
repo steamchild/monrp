@@ -34,3 +34,26 @@ function MoneyToString(Money)
 	end	
 	return ExitStr
 end
+
+ents.FindDoors = function()
+	local exit = ents.FindByClass("prop_door_rotating")
+	table.Add(exit,ents.FindByClass("func_door_rotating"))
+	table.Add(exit,ents.FindByClass("func_door"))
+	return exit
+end
+
+local ENTITY = FindMetaTable("Entity")
+
+function ENTITY:IsDoor()
+	local class = self:GetClass()
+	return table.HasValue({"prop_door_rotating","func_door_rotating","func_door"}, class )
+end
+
+function ENTITY:MrpGetOwners()
+	return self.MrpOwners
+end
+
+function ENTITY:IsOwner(ply)
+	if (table.HasValue(self.MrpOwners,ply)) then return true else return false end
+end
+

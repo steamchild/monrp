@@ -9,6 +9,10 @@ include( 'addstuff.lua' )
 include( 'cl_functions.lua' )
 include( 'cl_inventory.lua' )
 include( 'vgui/mrp_vgui.lua' )
+include( 'cl_datastreams.lua' )
+include( 'cl_ents.lua' )
+include( 'cl_special.lua' )
+
 
 local ArmorMoveTo = 0
 local ArmorMoving = 0
@@ -594,7 +598,7 @@ end
 
 function GM:HUDPaint()
 if (HUD == nil) then HudRefresh() end
-if (LocalPlayer():GetActiveWeapon()) then
+if (LocalPlayer():GetActiveWeapon() and LocalPlayer():GetActiveWeapon():IsValid()) then
 	if (LocalPlayer():GetActiveWeapon():GetClass() == "gmod_camera") then
 		if (SkinIcon:IsVisible()) then SkinIcon:SetVisible(false) end
 		return 

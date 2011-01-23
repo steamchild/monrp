@@ -49,6 +49,40 @@ function ENTITY:SendCommands(ply,commands) // Entity calls this function to send
 	datastream.StreamToClients( ply,  "ReceiveCommands", {ENTID,commands[1]} )
 end
 
+
 /*---------------------------------------------
 	USEFULL STUFF
 -----------------------------------------------*/
+
+function ENTITY:MrpAddOwner(ply)
+	if (!self.MrpOwners) then self.MrpOwners = {} end
+	table.insert(self.MrpOwners,ply)
+	local recep = RecipientFilter()
+	recep:AddAllPlayers()
+	SendDoorAddOwner(self,ply,recep)
+end
+
+function ENTITY:MrpRemoveOwner(ply)
+	if (!self.MrpOwners) then self.MrpOwners = {} return end
+	local removed
+	for k, v in pairs(self.MrpOwners) do
+		if (v == ply) then table.remove(self.MrpOwners,k) removed = k break end
+	end
+	local recep = RecipientFilter()
+	recep:AddAllPlayers()
+	SendDoorRemoveOwner(self,ply,removed,recep)
+end
+
+function ENTITY:SetMrpDoorGroup(str)
+	self.mrp_door_group = str
+	local recep = RecipientFilter()
+	recep:AddAllPlayers()
+	SendDoorGroupData(self,recep)
+end
+
+function ENTITY:SetDoorOwnerTeams(enum)
+	door.TeamOwn = enum
+	local recep = RecipientFilter()
+	recep:AddAllPlayers()
+	SendDoorTeamData(self,recep)
+end

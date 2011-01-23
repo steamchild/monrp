@@ -12,7 +12,7 @@ local namecol
 
 if (ply) then
 	name=ply.MrpName
-	if (name) then namecol = Color(50,30,255) else name="unknown" namecol = Color(50,50,50) end
+	if (name) then namecol = ply.Group.Color else name="unknown" namecol = Color(50,50,50) end
 else 
 	name = "" 
 	namecol = Color(0,0,0) 

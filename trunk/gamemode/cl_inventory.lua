@@ -30,7 +30,7 @@ function INVENTORY:Create(x,y,w,h,Index)
 		self.fr.inv.DoClick = function(self)
 			print(self:GetParent():GetParent():GetParent():GetParent():GetName())
 			print(self:GetParent():GetParent():GetParent():GetParent().mom)
-			self:GetParent():GetParent():GetParent():GetParent().mom:OnClick(self)
+			self:GetParent():GetParent():GetParent():GetParent():GetParent().mom:OnClick(self)
 		end
 		self.fr.inv:SetName("wut")
 
