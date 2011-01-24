@@ -5,9 +5,9 @@
 ( (_| |(  ___/| |   | ( ) ( ) |( (_| |
 `\__,_)`\____)(_)   (_) (_) (_)`\__,_) 
 
-	DPanelList
+	MENU_AUCTION
 	
-	A window.
+	AUCTION
 
 */
 local PANEL = {}
@@ -26,11 +26,14 @@ AccessorFunc( PANEL, "Padding", 	"Padding" )
 ---------------------------------------------------------*/
 function PANEL:Init()
 	self.currency = 1
+	self.LastTime = 0
 
-	self:SetDrawBorder( false )
-	self:SetDrawBackground( false )
 	self:SetSize(300,150)
 	self:Center()
+	self.TimeText = ""
+	self.PriceText = ""
+	self.Timer = 0
+	self.Price = 0
 
 	self.DFrame = vgui.Create( "DFrame",self) -- Creates the frame itself
 		self.DFrame:SetSize( 300, 150 ) -- Size of the frame
@@ -46,37 +49,41 @@ function PANEL:Init()
 			self:GetParent():Remove()
 		end
 
-	slef.Slider = vgui.Create( "DNumSlider", self.DFrame )
-		slef.Slider:SetPos( 10,34 )
-		slef.Slider:SetWide( 160 )
-		slef.Slider:SetText( "Max Props" )
-		slef.Slider:SetMin( 10 ) -- Minimum number of the slider
-		slef.Slider:SetMax( 100 ) -- Maximum number of the slider
-		slef.Slider:SetDecimals( 0 ) -- Sets a decimal. Zero means it's a whole number
-		NumSlider.OnValueChanged = function( self, val )
-			if (val < self:GetMin()) then self:SetValue(self:GetMin()) end
-			if (val > self:GetMax()*1.5) then self:SetValue( self:GetMax()*1.5) end
+	self.Slider = vgui.Create( "DNumSlider", self.DFrame )
+		self.Slider:SetPos( 10,34 )
+		self.Slider:SetWide( 160 )
+		self.Slider:SetText( "Add Price" )
+		self.Slider:SetMin( 10 ) -- Minimum number of the slider
+		self.Slider:SetMax( 100 ) -- Maximum number of the slider
+		self.Slider:SetValue(10)
+		self.Slider:SetDecimals( 0 ) -- Sets a decimal. Zero means it's a whole number
+		self.Slider.OnValueChanged = function( self, val )
+			//if (tonumber(val) < self.Wang:GetMin()) then self:SetValue(self.Wang:GetMin()) end
+			//if (tonumber(val) > self.Wang:GetMax()*1.5) then self:SetValue( self.Wang:GetMax()*1.5) end
 		end 
 
 	self.button = vgui.Create( "DButton", self.DFrame )
-		button:SetSize( 100, 22 )
-		button:SetPos( 190, 34 )
-		button:SetText( "Test Button" )
-		button.DoClick = function( self )
-			if (!self:GetPrent():GetCore()) then return end
-				datastream.StreamToServer( "Auc_AddPrice", {self:GetPrent():GetCore(), self:GetParent():GetCount()});
+		self.button:SetSize( 100, 22 )
+		self.button:SetPos( 190, 34 )
+		self.button:SetText( "Apply" )
+		self.button.DoClick = function( self )
+			if (!self:GetParent():GetParent():GetCore()) then return end
+				datastream.StreamToServer( "Auc_AddPrice", {self:GetParent():GetParent():GetCore(),
+					self:GetParent():GetParent():GetCount()});
 		end
 
 	
-	self.Label= vgui.Create("DLabel", myParent)
+	self.Label= vgui.Create("DLabel", self.DFrame)
 		self.Label:SetText("")
 		self.Label:SetPos(10,60)
-		self.Label:setSize(22,100)
+		self.Label:SetSize(200,44)
 end
 
 function PANEL:SetCore(core)
 	self.Core = core
+	self:SetIndex(core:EntIndex())
 	datastream.StreamToServer("AucOpn", core);
+	self:UpdateText()
 end
 
 
@@ -85,7 +92,7 @@ function PANEL:GetCore()
 end
 
 function PANEL:GetCount()
-	return slef.Slider:GetValue()
+	return self.Slider:GetValue()
 end
 
 function PANEL:SetMax(val)
@@ -99,17 +106,17 @@ function PANEL:SetMin(val)
 end
 
 function PANEL:SetPriceCoof(price)
-	self:SetMax( price*0.8 )
-	self:SetMin( price*0.1 )
+	local Min = price*0.1
+	local Max = price*0.8
+	if (Max > 100) then self:SetMax(Max) else self:SetMax(100) end
+	if (Min > 1) then self:SetMin(Min) else self:SetMin(1) end
 end
 
 function PANEL:SetCurrentPrice(price,bautominmax)
 	self.Price = price
 	if (self.OnPriceChanged) then self:OnPriceChanged(price) end
 	if (bautominmax) then self:SetPriceCoof(price) end
-	local Cur
-	if (self:GetCurrency() == 1) then Cur = "USD" else Cur = "EUR" end
-	self.Label:SetText("Current Price: "..Cur..tostring(price))
+	self:UpdateText()
 end
 
 function PANEL:GetPrice()
@@ -119,8 +126,8 @@ end
 function PANEL:SetCurrency(cur_enum)
 	if (cur_enum != 1 or cur_enum != 2) then return end
 	self.currency = cur_enum
-	if (self:GetCurrency() == 1) then Cur = "USD" else Cur = "EUR" end
 	self.Label:SetText("Current Price: "..Cur..tostring(self:GetPrice()))
+	self:UpdateText()
 end
 
 function PANEL:GetCurrency()
@@ -129,22 +136,81 @@ end
 
 function PANEL:OnRemove()
 	datastream.StreamToServer("AucClz", self:GetCore());
+	if (self.Index) then
+		VGUI_AUCTIONS[self.Index] = nil
+	end
 end
 
-derma.DefineControl( "DPanelListFix", "A menu that helps you buying realty", PANEL, "Panel" )
+function PANEL:SetIndex(ind)
+	if (self.Index and VGUI_AUCTIONS[self.Index]) then VGUI_AUCTIONS[self.Index] = nil end
+	self.Index = ind
+	VGUI_AUCTIONS[self.Index] = self
+end
+
+
+function PANEL:GetIndex()
+	return self.Index
+end
+
+function PANEL:Think( )
+	if (self.LastTime+1<=CurTime()) then
+		self:TimeTick()
+		self.LastTime = CurTime()
+	end
+end
+
+function PANEL:TimeTick()
+	if (self.Timer and self.Timer >= 1) then self.Timer = self.Timer - 1 else
+		if (self.Timer and self.Timer > 0) then self.Timer = 0 end 
+	end	
+	self:UpdateText()
+end
+
+function PANEL:SetTimer(time)
+	self.Timer = time
+end
+
+function PANEL:GetTimer()
+	return self.Timer
+end
+
+function PANEL:UpdateText()
+	local Cur
+	if (self:GetCurrency() == 1) then Cur = "USD" else Cur = "EUR" end
+	self.Label:SetText("Current Price: "..Cur..self.Price.."\nTime Left:"..self.Timer)
+end
+
+derma.DefineControl( "menu_auction", "A menu that helps you buying realty", PANEL, "Panel" )
+
+VGUI_AUCTIONS = {}
 
 function AucData( um )
 	local ent = Entity(um:ReadShort())
 	local cur = um:ReadBool()
-	local price = um:ReadLong()
-	if (!price) then price = um:ReadShort() end
+	local priceformat = um:ReadBool()
+	local price
+	if (priceformat) then price = um:ReadShort() else price = um:ReadLong() end
 	local time = um:ReadShort()
 
 	print("UMSG DATA RECEIVED: ")
 	print(ent)
+	print("Currency:")
 	print(cur)
+	print("Price:")
 	print(price)
+	print("Yime left:")
 	print(time)
+
+	local AUC = VGUI_AUCTIONS[ent:EntIndex()]
+	if (AUC and AUC:IsValid() ) then 
+		if (cur) then
+			AUC:SetCurrency(1)
+		else
+			AUC:SetCurrency(1)	
+		end
+		AUC:SetCurrentPrice(price,true)
+		AUC:SetTimer(time)
+	end
 end
 usermessage.Hook("aucdata", AucData)
 

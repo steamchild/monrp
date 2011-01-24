@@ -30,6 +30,7 @@ include( "sv_inventory.lua" )
 include( "sv_ents.lua" )
 include( "sv_auction.lua" )
 include( "sv_datastreams.lua" )
+include( "sv_functions.lua" )
 
 local meta = FindMetaTable("Entity")
 
@@ -64,6 +65,7 @@ function GM:PlayerInitialSpawn( ply )
 	ply:SetTeam(2)
 	ply:Spectate()
 	ply.Group = Groups[2]
+	ply.Realty = {}
 	if (!ply:LoadData()) then 
 		ply.USD = 500 
 		ply.EUR = 0 
@@ -77,7 +79,7 @@ function GM:PlayerInitialSpawn( ply )
 	local recep = RecipientFilter()
 		recep:AddPlayer(ply)
 	for k, v in pairs(ents.FindDoors()) do
-		v:SendDoorData(door,recep)
+		SendDoorData(v,recep)
 	end
 	ply:SetName("unknown")
 end
@@ -212,4 +214,7 @@ function GM:EntityKeyValue(  ent,  key,  value )
 		ent[ string.sub(key,5) ]=value
 	end
 end
- 
+
+function GM:InitPostEntity( )
+	ModifyAllGroupNamesToCores()
+end

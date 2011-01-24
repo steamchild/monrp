@@ -257,5 +257,5 @@ end
 //	OWNING
 //---------------------------------------------------
 function ply:AddRealty(core)
-	table.insert(ply.Realty,core)
+	table.insert(self.Realty,core)
 end
