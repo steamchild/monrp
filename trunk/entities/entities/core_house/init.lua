@@ -4,8 +4,9 @@ AddCSLuaFile("shared.lua")
 include("shared.lua")
 
 function ENT:Initialize()
-	self.PlyOpened = {}
+	self.Opened = {}
 	self.Currency = 1
+	self.SellTime = 60
 end
 
 
@@ -24,7 +25,7 @@ function ENT:GetPrice()
 end
 
 function ENT:GetPlyOpened()
-
+	return self.Opened
 end
 
 function ENT:IsSelling()
@@ -32,30 +33,20 @@ function ENT:IsSelling()
 end
 
 function ENT:PlyOpened(ply)
-	table.insert(self.PlyOpened,ply)
-	local price = self:GetPrice()
-	local recep = RecipientFilter()
-	for k, v in pairs(self.PlyOpened) do
-		recep:AddPlayer(v)
-	end
-	umsg.Start("aucdata", recep)
-		umsg.Short(self:GetIndex())
-		if (self:GetCurrency() == 1) then umsg.Bool(false) else umsg.Bool(true) end
-		if (price > 32766) then umsg.Long(price) else umsg.Short(price) end
-		umsg.Short(self.TimeLeft)
-	umsg.End()
+	table.insert(self.Opened,ply)
+	self:Inform(ply)
 end
 
 
 function ENT:PlyClosed(ply)
 	for k, v in pairs(self:GetPlyOpened()) do
-		if (v == ply) then table.remove(self.PlyOpened,k) break end
+		if (v == ply) then table.remove(self.Opened,k) break end
 	end
 end
 
 function ENT:SetBuyer(ply,price,cur)
-	local Set
 	if (cur != self:GetCurrency()) then return false end
+	if (!self:GetPrice()) then self:SetPrice(0) end
 	if self:GetCurrency() == 1 then
 		if (ply.USD < self:GetPrice()+price) then return false end
 	else
@@ -63,6 +54,8 @@ function ENT:SetBuyer(ply,price,cur)
 	end
 	self.Buyer = ply
 	self:AddPrice(price)
+	self:SetTimer(CurTime())
+	self:Inform()
 end
 
 function ENT:GetBuyer()
@@ -74,12 +67,9 @@ function ENT:AddPrice(amm)
 	self.Price = self.Price + amm
 end
 
-function ENT:GetPrice()
-	return self.Price
-end
-
 function ENT:SetTimer( time )
 	self.Timer = time
+	self.TimeLeft = self.SellTime
 end
 
 function ENT:GetTime()
@@ -96,7 +86,7 @@ end
 
 function ENT:Tick()
 	if (self:IsSelling()) then
-		self.TimeLeft = CurTime() - self.Timer
+		self.TimeLeft = (self.Timer+self.SellTime) - CurTime()
 		if (self.TimeLeft <= 0) then
 			if (self:GetBuyer()) then
 				self:Sell(self:GetBuyer(),self:GetPrice(),self:GetCurrency())
@@ -113,6 +103,7 @@ function ENT:Sell(ply,price,cur)
 			ply:ForceTakeMoneyEUR(price)
 		end
 		ply:AddRealty(self)
+		self.Timer = 0
 	end
 end
 
@@ -124,8 +115,30 @@ function ENT:MrpGetOwner()
 	return self.MrpOwner
 end
 
+function ENT:Inform(ply)
+	local price = self:GetPrice()
+	local recep = RecipientFilter()
+	local cur = self:GetCurrency()
+	if (ply) then 
+		recep:AddPlayer(ply)
+	else
+		for k, v in pairs(self.Opened) do
+			recep:AddPlayer(v)
+		end
+	end
+	umsg.Start("aucdata", recep)
+		umsg.Short(self:EntIndex( ))
+		if (cur == 1) then umsg.Bool(false) else umsg.Bool(true) end
+
+		if (price) then if (price > 32766) then umsg.Bool(false) umsg.Long(price) else
+			umsg.Bool(true) umsg.Short(price) end else umsg.Bool(true) umsg.Short(0) end
+
+		umsg.Short(self.TimeLeft)
+	umsg.End()
+end
+
 function CoreTick()
-	for k, v in paris(ents.FindByClass("core_house")) do
+	for k, v in pairs(ents.FindByClass("core_house")) do
 		if (v.Tick) then v:Tick() end
 	end
 end

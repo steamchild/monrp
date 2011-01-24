@@ -1,6 +1,6 @@
 function DoorDataReceive( handler, id, encoded, decoded )
 	local door = decoded[1]
-	if (decoded[2]) then door.mrp_door_group = decoded[2] end
+	if (decoded[2]) then door.Core = decoded[2] end
 	if (decoded[3]) then door.TeamOwn = decoded[3] end
 	if (decoded[4]) then door.MrpOwners = decided[4] end
 

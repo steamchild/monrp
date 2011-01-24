@@ -35,6 +35,11 @@ function MoneyToString(Money)
 	return ExitStr
 end
 
+ents.FindCores = function()
+	local exit = ents.FindByClass("core_house")
+	return exit
+end
+
 ents.FindDoors = function()
 	local exit = ents.FindByClass("prop_door_rotating")
 	table.Add(exit,ents.FindByClass("func_door_rotating"))
@@ -54,6 +59,7 @@ function ENTITY:MrpGetOwners()
 end
 
 function ENTITY:IsOwner(ply)
+	if (!self:MrpGetOwners()) then return end
 	if (table.HasValue(self.MrpOwners,ply)) then return true else return false end
 end
 
