@@ -48,7 +48,7 @@ function SWEP:PrimaryAttack()
 	if (!ent or !ent:IsValid()) then return end
 	if (self.Owner:EyePos():Distance(ent:GetPos()) > 65) then return end
 	if (ent:IsDoor()) then
-		if (ent:IsOwner(self.Owner)) then
+		if (ent:MrpIsOwner(self.Owner)) then
 			ent:Fire("lock", "", 0) -- Lock the door immediately so it won't annoy people
 			self:EmitSound(self.Sound)
 		else
@@ -62,7 +62,7 @@ function SWEP:SecondaryAttack()
 	if (!ent or !ent:IsValid()) then return end
 	if (self.Owner:EyePos():Distance(ent:GetPos()) > 65) then return end
 	if (ent:IsDoor()) then
-		if (ent:IsOwner(self.Owner)) then
+		if (ent:MrpIsOwner(self.Owner)) then
 			ent:Fire("unlock", "", 0) -- unLock the door immediately so it won't annoy people
 			self:EmitSound(self.Sound)
 		else

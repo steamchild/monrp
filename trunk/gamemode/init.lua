@@ -14,11 +14,13 @@ AddCSLuaFile( "cl_inventory.lua" )
 AddCSLuaFile( "cl_datastreams.lua" )
 AddCSLuaFile( "cl_ents.lua" )
 AddCSLuaFile( "cl_special.lua" )
+AddCSLuaFile( "cl_auction.lua" )
 
 //VGUI
 AddCSLuaFile( "vgui/DPanelListEnts.lua" )
 AddCSLuaFile( "vgui/DInvIcon.lua" )
 AddCSLuaFile( "vgui/mrp_vgui.lua" )
+AddCSLuaFile( "vgui/menu_auction.lua" )
  
 include( "shared.lua" )
 include( "sv_player.lua" )
@@ -202,7 +204,7 @@ function GM:AcceptStream ( pl, handler, id )
 		if (pl.LastRequest<CurTime()-0.2) then pl.LastRequest = CurTime() return true end
 	end
 	if handler == "CallFunction" or handler == "CallCommand" or handler == "Auc_AddPrice" 
-	or handler == "AucClz" or handler == "AucOpn"  then
+	or handler == "AucClz" or handler == "AucOpn" or handler == "BuyEnt" then
 		return true 
 	end
 	return false

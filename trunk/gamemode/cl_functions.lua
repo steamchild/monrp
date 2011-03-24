@@ -74,7 +74,7 @@ function DrawSigns()
 	local centerx = ScrW()/2
 	local centery = ScrH()/2-txtoffset
 	if (traceent and traceent:IsValid() and traceent:IsDoor()) then
-		if (traceent:IsOwner(LocalPlayer()) ) then
+		if (traceent:MrpIsOwner(LocalPlayer()) ) then
 			local names
 			if (traceent:MrpGetOwners()) then
 				names = ""

@@ -6,6 +6,7 @@ function KeyThink()
 end
 hook.Add("Think", "KeyThink", KeyThink)
  
+local defprice = 20
 
 function SpecialF1()
 	print("Pressed F1")
@@ -13,7 +14,10 @@ end
 
 function SpecialF2()
 	print("Pressed F2")
-	if (LocalPlayer():GetEyeTrace().
+	local trace = LocalPlayer():GetEyeTrace()
+	if (trace.Entity and trace.Entity:IsValid()) then
+		datastream.StreamToServer( "BuyEnt", trace.Entity);
+	end
 end
 
 function SpecialF3()

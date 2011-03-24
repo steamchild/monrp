@@ -67,8 +67,8 @@ function PANEL:Init()
 		self.button:SetPos( 190, 34 )
 		self.button:SetText( "Apply" )
 		self.button.DoClick = function( self )
-			if (!self:GetParent():GetParent():GetCore()) then return end
-				datastream.StreamToServer( "Auc_AddPrice", {self:GetParent():GetParent():GetCore(),
+			if (!self:GetParent():GetParent():GetEnt()) then return end
+				datastream.StreamToServer( "Auc_AddPrice", {self:GetParent():GetParent():GetEnt(),
 					self:GetParent():GetParent():GetCount()});
 		end
 
@@ -77,18 +77,18 @@ function PANEL:Init()
 		self.Label:SetText("")
 		self.Label:SetPos(10,60)
 		self.Label:SetSize(200,44)
+	return self
 end
 
-function PANEL:SetCore(core)
-	self.Core = core
-	self:SetIndex(core:EntIndex())
-	datastream.StreamToServer("AucOpn", core);
+function PANEL:SetEnt(ent)
+	self.Ent = ent
+	if (!self:SetIndex(ent:EntIndex())) then self:Remove() end
 	self:UpdateText()
 end
 
 
-function PANEL:GetCore()
-	return self.Core
+function PANEL:GetEnt()
+	return self.Ent
 end
 
 function PANEL:GetCount()
@@ -126,7 +126,6 @@ end
 function PANEL:SetCurrency(cur_enum)
 	if (cur_enum != 1 or cur_enum != 2) then return end
 	self.currency = cur_enum
-	self.Label:SetText("Current Price: "..Cur..tostring(self:GetPrice()))
 	self:UpdateText()
 end
 
@@ -135,16 +134,21 @@ function PANEL:GetCurrency()
 end
 
 function PANEL:OnRemove()
-	datastream.StreamToServer("AucClz", self:GetCore());
+print("menu_auction OnRemove()")
+	datastream.StreamToServer("AucClz", self:GetEnt());
 	if (self.Index) then
 		VGUI_AUCTIONS[self.Index] = nil
 	end
 end
 
 function PANEL:SetIndex(ind)
-	if (self.Index and VGUI_AUCTIONS[self.Index]) then VGUI_AUCTIONS[self.Index] = nil end
+	if !VGUI_AUCTIONS[ind] == nil then return false end
+	if (self.Index and VGUI_AUCTIONS[self.Index]==self) then
+			VGUI_AUCTIONS[self.Index] = nil
+	end
 	self.Index = ind
 	VGUI_AUCTIONS[self.Index] = self
+	return true
 end
 
 
@@ -160,57 +164,34 @@ function PANEL:Think( )
 end
 
 function PANEL:TimeTick()
-	if (self.Timer and self.Timer >= 1) then self.Timer = self.Timer - 1 else
-		if (self.Timer and self.Timer > 0) then self.Timer = 0 end 
-	end	
+	if (self.EndTime) then self.Timer = self.EndTime - CurTime() end
+	if (self.Timer <= 0) then self.EndTime = false self.Timer = 0 end
 	self:UpdateText()
 end
 
-function PANEL:SetTimer(time)
-	self.Timer = time
+function PANEL:SetEndTime(time)
+	self.EndTime = time
 end
 
-function PANEL:GetTimer()
-	return self.Timer
+function PANEL:GetEndTime()
+	return self.EndTime
 end
 
 function PANEL:UpdateText()
 	local Cur
 	if (self:GetCurrency() == 1) then Cur = "USD" else Cur = "EUR" end
-	self.Label:SetText("Current Price: "..Cur..self.Price.."\nTime Left:"..self.Timer)
+	self.Label:SetText("Current Price: "..Cur.." "..self.Price.."\nTime Left: "..math.Round(self.Timer).."sec")
+end
+
+function PANEL:RefreshData()
+	local ent = self.Ent
+	local price = ent.Price or 0
+	local cur = ent.Currency or 1
+	self:SetCurrentPrice(price,true)
+	self:SetCurrency(cur)
+	self:SetEndTime(ent.EndTime)
 end
 
 derma.DefineControl( "menu_auction", "A menu that helps you buying realty", PANEL, "Panel" )
 
-VGUI_AUCTIONS = {}
-
-function AucData( um )
-	local ent = Entity(um:ReadShort())
-	local cur = um:ReadBool()
-	local priceformat = um:ReadBool()
-	local price
-	if (priceformat) then price = um:ReadShort() else price = um:ReadLong() end
-	local time = um:ReadShort()
-
-	print("UMSG DATA RECEIVED: ")
-	print(ent)
-	print("Currency:")
-	print(cur)
-	print("Price:")
-	print(price)
-	print("Yime left:")
-	print(time)
-
-	local AUC = VGUI_AUCTIONS[ent:EntIndex()]
-	if (AUC and AUC:IsValid() ) then 
-		if (cur) then
-			AUC:SetCurrency(1)
-		else
-			AUC:SetCurrency(1)	
-		end
-		AUC:SetCurrentPrice(price,true)
-		AUC:SetTimer(time)
-	end
-end
-usermessage.Hook("aucdata", AucData)
 

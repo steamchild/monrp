@@ -12,6 +12,7 @@ include( 'vgui/mrp_vgui.lua' )
 include( 'cl_datastreams.lua' )
 include( 'cl_ents.lua' )
 include( 'cl_special.lua' )
+include( 'cl_auction.lua' )
 
 
 local ArmorMoveTo = 0
@@ -776,26 +777,9 @@ if name == "CHudHealth" or
 
 end
 
-function Stream( handle, id, encoded, decoded )
-for k, v in pairs(decoded[1]) do
-	LocalPlayer():SetVar(decoded[1][k],decoded[2][k])
-end
-end
-datastream.Hook( "Player_Data", Stream );
-
 function GM:DrawDeathNotice(x,y)
 	self.BaseClass:DrawDeathNotice(x, y)
 end
-
-local function DisplayNotify(msg)
-	local txt = msg:ReadString()
-	GAMEMODE:AddNotify(txt, msg:ReadShort(), msg:ReadLong())
-	surface.PlaySound("ambient/water/drip" .. math.random(1, 4) .. ".wav")
-
-	-- Log to client console
-	print(txt)
-end
-usermessage.Hook("_Notify", DisplayNotify)
 
 function GM:Initialize()
 	PixVis = util.GetPixelVisibleHandle();
