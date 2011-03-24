@@ -58,8 +58,32 @@ function ENTITY:MrpGetOwners()
 	return self.MrpOwners
 end
 
-function ENTITY:IsOwner(ply)
+function ENTITY:MrpIsOwner(ply)
 	if (!self:MrpGetOwners()) then return end
 	if (table.HasValue(self.MrpOwners,ply)) then return true else return false end
 end
 
+function ENTITY:MrpIsOwned()
+	if (!self.MrpOwners) then return false end
+	if (table.getn(self.MrpOwners) == 0) then return false else return true end
+end
+
+function ENTITY:IsForSale()
+	if (self.ForSale or !self:MrpIsOwned()) then return true end
+	return false
+end
+
+function ENTITY:IsForSaleAuction()
+	return self.ForSaleAuction
+end
+
+
+local PLAYER = FindMetaTable("Player")
+
+function PLAYER:HasMoney(amm,cur)
+	if (cur == 1) then
+		return self.USD > amm
+	else
+		return self.EUR > amm
+	end
+end

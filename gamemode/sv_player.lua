@@ -12,6 +12,18 @@ datastream.StreamToClients(self, "Player_Data", {VarNames,VarValues} );
 
 end 
 
+function ply:Notify(text)
+	Recep = RecipientFilter()
+	Recep:AddPlayer( self )
+	SendMessage(Recep,text,1,2)
+end
+
+function NotifyAll(text)
+	Recep = RecipientFilter()
+	Recep:AddAllPlayers()
+	SendMessage(Recep,text)
+end
+
 //--------------------------------------------------
 //	LOAD DATA
 //--------------------------------------------------
@@ -168,34 +180,50 @@ function ply:HitSpeed(time)
 	end
 end
 
-function ply:AddMoneyUSD(amount)
-	self.USD = self.USD + amount self:SendData({"USD"},{self.USD}) return
+function ply:AddMoneyUSD(ammount)
+	self.USD = self.USD + ammount self:SendData({"USD"},{self.USD}) return
 end
 
-function ply:AddMoneyEUR(amount)
-	self.EUR = self.EUR + amount self:SendData({"EUR"},{self.EUR}) return
+function ply:AddMoneyEUR(ammount)
+	self.EUR = self.EUR + ammount self:SendData({"EUR"},{self.EUR}) return
 end
 
-function ply:TakeMoneyEUR(amount)
-	if (self.EUR-amount>=0) then self.EUR=self.EUR-amount self:SendData({"EUR"},{self.EUR}) return true end
+function ply:TakeMoneyEUR(ammount)
+	if (self.EUR-ammount>=0) then self.EUR=self.EUR-ammount self:SendData({"EUR"},{self.EUR}) return true end
 	return false
 end
 
-function ply:TakeMoneyUSD(amount)
-	if (self.USD-amount>=0) then self.USD=self.USD-amount self:SendData({"USD"},{self.USD}) return true end
+function ply:TakeMoneyUSD(ammount)
+	if (self.USD-ammount>=0) then self.USD=self.USD-ammount self:SendData({"USD"},{self.USD}) return true end
 	return false
+end
+
+function ply:TakeMoney(amm,cur)
+	if (cur == 1) then
+		return self:TakeMoneyUSD(amm)
+	else
+		return self:TakeMoneyEUR(amm)
+	end
 end
 /*-------------------------------------------
 	USE WITH CARE
 --------------------------------------------*/
-function ply:ForceTakeMoneyEUR(amount)
-	self.EUR=self.EUR-amount self:SendData({"EUR"},{self.EUR})
+function ply:ForceTakeMoneyEUR(ammount)
+	self.EUR=self.EUR-ammount self:SendData({"EUR"},{self.EUR})
 	if (self.EUR < 0) then return false else return true end
 end
 
-function ply:ForceTakeMoneyUSD(amount)
-	self.USD=self.USD-amount self:SendData({"USD"},{self.USD})
+function ply:ForceTakeMoneyUSD(ammount)
+	self.USD=self.USD-ammount self:SendData({"USD"},{self.USD})
 	if (self.USD < 0) then return false else return true end
+end
+
+function ply:ForceTakeMoney(ammount,cur)
+	if (cur == 1) then
+		return self:ForceTakeMoneyUSD(ammount)
+	else
+		return self:ForceTakeMoneyEUR(ammount)
+	end
 end
 
 /*-------------------------------------------
@@ -238,8 +266,8 @@ function ply:CalcFatigue()
 	self:SendData( {"Fatigue"},{self.Fatigue} )
 end
 
-function ply:AddHunger(amount)
-	if (self.Hunger+amount < 100) then self.Hunger = self.Hunger+amount else self.Hunger = 100 end
+function ply:AddHunger(ammount)
+	if (self.Hunger+ammount < 100) then self.Hunger = self.Hunger+ammount else self.Hunger = 100 end
 	self:SendData( {"Hunger"},{self.Hunger} )
 end
 
@@ -258,4 +286,17 @@ end
 //---------------------------------------------------
 function ply:AddRealty(core)
 	table.insert(self.Realty,core)
+end
+
+function ply:RemoveRealty(core)
+	for k, v in pairs(self.Realty) do
+		if (v == core) then table.remove(self.Realty, k) return true end
+	end
+	return false
+end
+
+function ply:MrpIsOwner(ent)
+	local owners = ent:MrpGetOwners()
+	if !owners then return false end
+	return table.HasValue(owners,self)
 end

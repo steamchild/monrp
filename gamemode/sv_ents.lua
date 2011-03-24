@@ -33,18 +33,18 @@ function ENTITY:GetChanges(svn)
 		mode = true return Log, mode  end
 end
 
-function ENTITY:SendItems(ply,svn,entsvn) // Entity calls this function to send its items to client
+function ENTITY:SendItems(ply,svn,entsvn) // Entity calls this functian to send its items to client
 	local Log, mode = self:GetChanges(svn)
 	local ENTID = self:EntIndex()
 	datastream.StreamToClients( ply,  "ReceiveItems", {ENTID,Log,mode,entsvn} )
 end
 
-function ENTITY:SendFunctions(ply,functions) // Entity calls this function to send its items to client
+function ENTITY:SendFunctions(ply,functions) // Entity calls this functian to send its items to client
 	local ENTID = self:EntIndex()
 	datastream.StreamToClients( ply,  "ReceiveFunctions", {ENTID,functions[1]} )
 end
 
-function ENTITY:SendCommands(ply,commands) // Entity calls this function to send its items to client
+function ENTITY:SendCommands(ply,commands) // Entity calls this functian to send its items to client
 	local ENTID = self:EntIndex()
 	datastream.StreamToClients( ply,  "ReceiveCommands", {ENTID,commands[1]} )
 end
@@ -59,7 +59,7 @@ function ENTITY:MrpAddOwner(ply)
 	table.insert(self.MrpOwners,ply)
 	local recep = RecipientFilter()
 	recep:AddAllPlayers()
-	SendDoorAddOwner(self,ply,recep)
+	SendAddOwner(self,ply,recep)
 end
 
 function ENTITY:MrpRemoveOwner(ply)
@@ -70,19 +70,85 @@ function ENTITY:MrpRemoveOwner(ply)
 	end
 	local recep = RecipientFilter()
 	recep:AddAllPlayers()
-	SendDoorRemoveOwner(self,ply,removed,recep)
+	SendRemoveOwner(self,ply,removed,recep)
 end
 
-function ENTITY:SetMrpDoorGroup(str)
+function ENTITY:OwnSingle(ply)
+	self.MrpOwners = {ply}
+	local recep = RecipientFilter()
+	recep:AddAllPlayers()
+	SendOwnersData(self,recep)
+end
+
+function ENTITY:UnOwn()
+	self.MrpOwners = {}
+	local recep = RecipientFilter()
+	recep:AddAllPlayers()
+	SendOwnersData(self,recep)
+end
+
+function ENTITY:SetOwnGroup(str)
 	self.mrp_door_group = str
 	local recep = RecipientFilter()
 	recep:AddAllPlayers()
-	SendDoorGroupData(self,recep)
+	SendGroupData(self,recep)
 end
 
-function ENTITY:SetDoorOwnerTeams(enum)
+function ENTITY:SetOwnerTeams(enum)
 	door.TeamOwn = enum
 	local recep = RecipientFilter()
 	recep:AddAllPlayers()
-	SendDoorTeamData(self,recep)
+	SendTeamData(self,recep)
+end
+
+//-----------------------------BUYING SHIT-------------------------------
+function ENTITY:SetBuyer(ply)
+	self.buyer = ply
+end
+
+function ENTITY:GetBuyer()
+	return self.buyer
+end
+
+function ENTITY:SetPrice(amm)
+	self.price = amm
+end
+
+function ENTITY:GetPrice()
+	return self.price or 0
+end
+
+function ENTITY:SetCurrency(cur)
+	self.currency = cur
+end
+
+function ENTITY:GetCurrency()
+	if (!self.currency and self.currency != 0) then self.currency = 1 end
+	return self.currency
+end
+
+function ENTITY:Buy()
+	if (!self.buyer or !self.price or !self.currency) then return end
+	if self.buyer:TakeMoney(self.price,self.currency) then self:OwnSingle(self.buyer) end
+end
+
+function ENTITY:ForceBuy()
+	if (!self.buyer or !self.price or !self.currency) then return end
+	self:OwnSingle(self.buyer)
+	return self.buyer:ForceTakeMoney(self.price,self.currency)
+end
+
+function ENTITY:GetNiceName(barticle)
+	local name = ""
+	name = self:GetName()
+	if !name then
+		local class = self:GetClass()
+		if (string.sub(class,1,4) == "core") then class = string.sub(class,5) end
+		name = class
+	end
+	
+	if barticle and (table.HasValue({e,y,u,i,o,a},string.sub(name,1,1))) then
+		name = "an "..name else name = "a "..name
+	end
+	return name
 end
