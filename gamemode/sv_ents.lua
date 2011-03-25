@@ -129,26 +129,35 @@ end
 
 function ENTITY:Buy()
 	if (!self.buyer or !self.price or !self.currency) then return end
-	if self.buyer:TakeMoney(self.price,self.currency) then self:OwnSingle(self.buyer) end
+	if self.buyer:TakeMoney(self.price,self.currency) then
+		self:OwnSingle(self.buyer)
+		if (self.OnBuy) then self:OnBuy(self.buyer) end
+	end
 end
 
 function ENTITY:ForceBuy()
 	if (!self.buyer or !self.price or !self.currency) then return end
 	self:OwnSingle(self.buyer)
+	if (self.OnBuy) then self:OnBuy(self.buyer) end
 	return self.buyer:ForceTakeMoney(self.price,self.currency)
 end
 
 function ENTITY:GetNiceName(barticle)
-	local name = ""
+	local name
 	name = self:GetName()
-	if !name then
+	print("SV_ENTS: self:GetName() = "..name)
+	if !name or name == "" then
 		local class = self:GetClass()
-		if (string.sub(class,1,4) == "core") then class = string.sub(class,5) end
+		print("SV_ENTS: self:GetClass() = "..class)
+		if (string.sub(class,1,5) == "core_") then class = string.sub(class,6) end
 		name = class
 	end
+	
+	print("SV_ENTS: name = "..name)
 	
 	if barticle and (table.HasValue({e,y,u,i,o,a},string.sub(name,1,1))) then
 		name = "an "..name else name = "a "..name
 	end
+	print("SV_ENTS: Final = "..name)
 	return name
 end

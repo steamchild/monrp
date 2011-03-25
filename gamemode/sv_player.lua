@@ -15,7 +15,7 @@ end
 function ply:Notify(text)
 	Recep = RecipientFilter()
 	Recep:AddPlayer( self )
-	SendMessage(Recep,text,1,2)
+	SendMessage(Recep,text,1,5)
 end
 
 function NotifyAll(text)
