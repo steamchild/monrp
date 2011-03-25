@@ -9,7 +9,11 @@ function ENT:Initialize()
 	self.SellTime = 60
 end
 
-
+function ENT:OnBuy(buyer)
+	for k, v in pairs(self.Doors) do
+		v:OwnSingle(buyer)
+	end
+end
 
 
 function ENT:OnRemove( )

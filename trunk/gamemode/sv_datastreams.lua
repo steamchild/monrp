@@ -39,7 +39,7 @@ function BuyEntAttempt( ply, handler, id, encoded, decoded )
 	ent = decoded
 	local ActEnt
 	if (ent.Core) then ActEnt = ent.Core else ActEnt = ent end
-	if (ply:MrpIsOwner(ActEnt)) then ply:Notify("You already own this") end
+	if (ply:MrpIsOwner(ActEnt)) then ply:Notify("You already own this") return end
 	if ( !ActEnt:IsForSale() and ActEnt:MrpIsOwned() ) then ply:Notify("This is not for sale") return false end
 		if (!ActEnt.Price) then ActEnt.Price = 0 end
 		if (!ActEnt.Currency) then ActEnt.Currency = 1 end

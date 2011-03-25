@@ -64,6 +64,5 @@ end
 
 function AucTimeEnd(ent)
 	ent:ForceBuy()
-	if (ent.OnBuy) then ent:OnBuy() end
 	ent.buyer:Notify("You have just bought "..ent:GetNiceName(true))
 end
